@@ -7,6 +7,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import java.time.OffsetDateTime;
+import java.util.Arrays;
 import java.util.Objects;
 
 @ControllerAdvice
@@ -28,6 +29,7 @@ public class ExceptionHandler {
     @org.springframework.web.bind.annotation.ExceptionHandler({Throwable.class})
     public ResponseEntity<Object> handleEverythingElse(Throwable e) {
         ApiError responseMessage = ApiError.builder().timestamp(OffsetDateTime.now()).message(e.getMessage()).build();
+        responseMessage.setDetails(Arrays.asList(e.getStackTrace()).toString());
         HttpStatus responseStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         return new ResponseEntity<>(responseMessage, responseStatus);
     }

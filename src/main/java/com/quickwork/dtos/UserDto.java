@@ -12,4 +12,5 @@ public class UserDto {
     private String username;
     private List<AdDto> ads;
     private List<ReviewDto> reviews;
+    private String rating;
 }

@@ -32,11 +32,17 @@ public class UserController {
         this.modelMapper = modelMapper;
     }
 
+    @ApiOperation(value = "Auth", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/authenticate")
+    public String authenticate() {
+        return userService.getUsers().toString();
+    }
+
     @ApiOperation(value = "Retrieve all users data from DB", produces = MediaType.APPLICATION_JSON_VALUE)
     @GetMapping(value = Endpoints.USERS)
     public List<UserDto> getAllUsers() {
-        List<User> users = userService.getUsers();
-        return users.stream().map(e -> modelMapper.map(e, UserDto.class)).collect(Collectors.toList());
+        return userService.getUsers();
+        //return users.stream().map(e -> modelMapper.map(e, UserDto.class)).collect(Collectors.toList());
     }
 
     @ApiOperation(value = "Retrieve all users data from DB by ID", produces = MediaType.APPLICATION_JSON_VALUE)

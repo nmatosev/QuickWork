@@ -17,7 +17,7 @@ public interface UserService {
 
     void deleteUser(long id);
 
-    List<User> getUsers();
+    List<UserDto> getUsers();
 
     List<Ad> getActiveAdsByUsername(String username);
 

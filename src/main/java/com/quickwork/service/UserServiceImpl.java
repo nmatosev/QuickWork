@@ -6,10 +6,10 @@ import com.quickwork.model.Review;
 import com.quickwork.model.User;
 import com.quickwork.repository.UserDAO;
 import com.quickwork.service.exception.NotFoundException;
-import org.apache.commons.logging.Log;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -88,8 +88,34 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> getUsers() {
-        return userDAO.findAll();
+    public List<UserDto> getUsers() {
+        List<User> users = userDAO.findAll();
+        List<UserDto> userDtos = new ArrayList<>();
+        for (User user : users) {
+            UserDto userDto = new UserDto();
+            mapToDto(user, userDto);
+
+            userDtos.add(userDto);
+        }
+        return userDtos;
+    }
+
+    private void mapToDto(User user, UserDto userDto) {
+        userDto.setUsername(user.getUsername());
+        userDto.setRating(calculateAverage(user));
+    }
+
+    private String calculateAverage(User user) {
+        double sum = 0.0;
+        for (Review review : user.getReviews()) {
+            sum += review.getRating();
+        }
+        if (sum > 0.0) {
+            double avg = sum / user.getReviews().size();
+            return String.format("%.2f", avg);
+        } else {
+            return "-";
+        }
     }
 
 }
