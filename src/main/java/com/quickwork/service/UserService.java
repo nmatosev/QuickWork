@@ -21,5 +21,8 @@ public interface UserService {
 
     List<Ad> getActiveAdsByUsername(String username);
 
+    List<Ad> getActiveAds();
+
+
     List<Review> getReviewsByUsername(String username);
 }

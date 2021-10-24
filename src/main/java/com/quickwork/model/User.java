@@ -1,6 +1,5 @@
 package com.quickwork.model;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -30,7 +29,7 @@ public class User implements UserDetails {
     private String username;
     private String email;
     private String password;
-    private String roleCode;
+    private String role;
 
     @OneToMany(mappedBy = "user")
     List<Ad> ads;
@@ -43,7 +42,7 @@ public class User implements UserDetails {
         this.username = username;
         this.email = email;
         this.password = encodedPassword;
-        this.roleCode = roleCode;
+        this.role = roleCode;
 
     }
 

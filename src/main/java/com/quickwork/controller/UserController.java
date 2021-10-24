@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +21,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api")
+@CrossOrigin
+//@RequestMapping("/api")
 public class UserController {
 
 
@@ -39,7 +41,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "Retrieve all users data from DB", produces = MediaType.APPLICATION_JSON_VALUE)
-    @GetMapping(value = Endpoints.USERS)
+    @GetMapping(value = "/public" + Endpoints.USERS)
     public List<UserDto> getAllUsers() {
         return userService.getUsers();
         //return users.stream().map(e -> modelMapper.map(e, UserDto.class)).collect(Collectors.toList());
@@ -63,6 +65,13 @@ public class UserController {
     @GetMapping(value = "adsByUsername/{username}")
     public List<AdDto> getUsersAds(@PathVariable("username") String username) {
         List<Ad> ads = userService.getActiveAdsByUsername(username);
+        return ads.stream().map(e->modelMapper.map(e, AdDto.class)).collect(Collectors.toList());
+    }
+
+    @ApiOperation(value = "Retrieve all active ads", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "public/ads")
+    public List<AdDto> getAds() {
+        List<Ad> ads = userService.getActiveAds();
         return ads.stream().map(e->modelMapper.map(e, AdDto.class)).collect(Collectors.toList());
     }
 
