@@ -1,5 +1,6 @@
 package com.quickwork.service;
 
+import com.quickwork.dtos.AdDto;
 import com.quickwork.dtos.UserDto;
 import com.quickwork.model.Ad;
 import com.quickwork.model.Review;
@@ -21,8 +22,9 @@ public interface UserService {
 
     List<Ad> getActiveAdsByUsername(String username);
 
-    List<Ad> getActiveAds();
+    List<AdDto> getActiveAds();
 
+    void insertAd(AdDto adDto);
 
     List<Review> getReviewsByUsername(String username);
 }

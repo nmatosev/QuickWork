@@ -12,7 +12,7 @@ public class AdDto {
     private long id;
     private String title;
     private String content;
-    private boolean active;
-    private Date validUntil;
+    private long userId;
+    private String validUntil;
 
 }

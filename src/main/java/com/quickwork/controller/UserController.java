@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -71,8 +73,15 @@ public class UserController {
     @ApiOperation(value = "Retrieve all active ads", produces = MediaType.APPLICATION_JSON_VALUE)
     @GetMapping(value = "public/ads")
     public List<AdDto> getAds() {
-        List<Ad> ads = userService.getActiveAds();
-        return ads.stream().map(e->modelMapper.map(e, AdDto.class)).collect(Collectors.toList());
+        List<AdDto> ads = userService.getActiveAds();
+        return ads;
     }
 
+    @ApiOperation(value = "Retrieve all active ads", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "public/insertAd")
+    public ResponseEntity<String> insertAd(@RequestBody AdDto adDto) {
+        userService.insertAd(adDto);
+        return new ResponseEntity<>("Ad inserted successfully!", HttpStatus.CREATED);
+
+    }
 }

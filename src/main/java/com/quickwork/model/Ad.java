@@ -24,7 +24,6 @@ public class Ad {
     private long id;
     private String title;
     private String content;
-    private boolean active;
     private Date validUntil;
 
     @ManyToOne(fetch = FetchType.EAGER)
