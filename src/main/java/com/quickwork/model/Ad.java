@@ -30,4 +30,7 @@ public class Ad {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "county_id", nullable = false)
+    private County county;
 }

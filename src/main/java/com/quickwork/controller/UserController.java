@@ -3,6 +3,7 @@ package com.quickwork.controller;
 import com.quickwork.dtos.AdDto;
 import com.quickwork.dtos.UserDto;
 import com.quickwork.model.Ad;
+import com.quickwork.model.County;
 import com.quickwork.model.User;
 import com.quickwork.service.UserService;
 import com.quickwork.utilities.Endpoints;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -73,15 +75,30 @@ public class UserController {
     @ApiOperation(value = "Retrieve all active ads", produces = MediaType.APPLICATION_JSON_VALUE)
     @GetMapping(value = "public/ads")
     public List<AdDto> getAds() {
-        List<AdDto> ads = userService.getActiveAds();
-        return ads;
+        return userService.getActiveAds();
     }
 
-    @ApiOperation(value = "Retrieve all active ads", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PostMapping(value = "public/insertAd")
+    @ApiOperation(value = "Insert ad", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "public/ad")
     public ResponseEntity<String> insertAd(@RequestBody AdDto adDto) {
         userService.insertAd(adDto);
         return new ResponseEntity<>("Ad inserted successfully!", HttpStatus.CREATED);
 
     }
+
+    @ApiOperation(value = "Delete ad", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "public/ad/{id}")
+    public ResponseEntity<String> deleteAd(@PathVariable("id") long id) {
+        userService.deleteAd(id);
+        return new ResponseEntity<>("Ad deleted successfully!", HttpStatus.OK);
+
+    }
+
+
+    @ApiOperation(value = "Get all counties", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "public/counties")
+    public List<County> getCounties() {
+        return userService.getCounties();
+    }
+
 }

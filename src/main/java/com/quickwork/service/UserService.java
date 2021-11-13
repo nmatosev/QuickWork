@@ -3,6 +3,7 @@ package com.quickwork.service;
 import com.quickwork.dtos.AdDto;
 import com.quickwork.dtos.UserDto;
 import com.quickwork.model.Ad;
+import com.quickwork.model.County;
 import com.quickwork.model.Review;
 import com.quickwork.model.User;
 
@@ -26,5 +27,9 @@ public interface UserService {
 
     void insertAd(AdDto adDto);
 
+    void deleteAd(long id);
+
     List<Review> getReviewsByUsername(String username);
+
+    List<County> getCounties();
 }

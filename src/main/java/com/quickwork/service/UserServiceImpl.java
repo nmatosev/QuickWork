@@ -3,9 +3,11 @@ package com.quickwork.service;
 import com.quickwork.dtos.AdDto;
 import com.quickwork.dtos.UserDto;
 import com.quickwork.model.Ad;
+import com.quickwork.model.County;
 import com.quickwork.model.Review;
 import com.quickwork.model.User;
 import com.quickwork.repository.AdDAO;
+import com.quickwork.repository.CountyDAO;
 import com.quickwork.repository.UserDAO;
 import com.quickwork.service.exception.NotFoundException;
 import org.modelmapper.ModelMapper;
@@ -26,13 +28,15 @@ public class UserServiceImpl implements UserService {
 
     private final UserDAO userDAO;
     private final AdDAO adDAO;
+    private final CountyDAO countyDAO;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy.");
     private final ModelMapper modelMapper;
 
 
-    public UserServiceImpl(UserDAO userDAO, AdDAO adDAO, ModelMapper modelMapper) {
+    public UserServiceImpl(UserDAO userDAO, AdDAO adDAO, CountyDAO countyDAO, ModelMapper modelMapper) {
         this.userDAO = userDAO;
         this.adDAO = adDAO;
+        this.countyDAO = countyDAO;
         this.modelMapper = modelMapper;
     }
 
@@ -101,7 +105,15 @@ public class UserServiceImpl implements UserService {
         adDAO.save(ad);
     }
 
-
+    @Override
+    public void deleteAd(long id) {
+        Optional<Ad> ad = adDAO.findById(id);
+        if (ad.isPresent()) {
+            adDAO.deleteById(ad.get().getId());
+        } else {
+            throw new NotFoundException("Ad with id " + id + " does not exist!");
+        }
+    }
 
     private void mapDtoToAd(Ad ad, AdDto adDto) {
         ad.setTitle(adDto.getTitle());
@@ -121,6 +133,11 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new NotFoundException("User with username " + username + " not found!");
         }
+    }
+
+    @Override
+    public List<County> getCounties() {
+        return countyDAO.findAll();
     }
 
 
