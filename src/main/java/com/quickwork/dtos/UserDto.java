@@ -17,6 +17,7 @@ public class UserDto {
     private String token;
     private List<String> roles = new ArrayList<>();
     private String email;
+    private String phoneNumber;
 
 
 }

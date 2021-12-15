@@ -9,5 +9,6 @@ public class RegistrationRequest {
     private final String password;
     private final String email;
     private final String roleCode;
+    private final String phoneNumber;
 
 }

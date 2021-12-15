@@ -95,7 +95,18 @@ public class UserServiceImpl implements UserService {
         adDto.setContent(ad.getContent());
         adDto.setTitle(ad.getTitle());
         adDto.setValidUntil(validUntil);
+        adDto.setCounty(ad.getCounty().getName());
+        adDto.setUser(getUserData(ad.getUser()));
         return adDto;
+    }
+
+    private UserDto getUserData(User user) {
+        UserDto userDto = new UserDto();
+        userDto.setUsername(user.getUsername());
+        userDto.setEmail(user.getEmail());
+        userDto.setPhoneNumber(user.getPhoneNumber());
+        userDto.setRating(calculateAverage(user));
+        return userDto;
     }
 
     @Override
@@ -118,6 +129,9 @@ public class UserServiceImpl implements UserService {
     private void mapDtoToAd(Ad ad, AdDto adDto) {
         ad.setTitle(adDto.getTitle());
         ad.setContent(adDto.getContent());
+        County county = new County();
+        county.setId(adDto.getCountyId());
+        ad.setCounty(county);
         Date weekAfter = new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 7));
         ad.setValidUntil(weekAfter);
         User user = new User();
@@ -168,6 +182,7 @@ public class UserServiceImpl implements UserService {
         userDto.setUsername(user.getUsername());
         userDto.setRating(calculateAverage(user));
         userDto.setEmail(user.getEmail());
+        userDto.setPhoneNumber(user.getPhoneNumber());
     }
 
     private String calculateAverage(User user) {

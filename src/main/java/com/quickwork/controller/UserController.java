@@ -8,6 +8,8 @@ import com.quickwork.model.User;
 import com.quickwork.service.UserService;
 import com.quickwork.utilities.Endpoints;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -18,7 +20,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @CrossOrigin
 //@RequestMapping("/api")
 public class UserController {
+    protected final Log logger = LogFactory.getLog(this.getClass());
 
 
     private final UserService userService;
@@ -69,7 +71,7 @@ public class UserController {
     @GetMapping(value = "adsByUsername/{username}")
     public List<AdDto> getUsersAds(@PathVariable("username") String username) {
         List<Ad> ads = userService.getActiveAdsByUsername(username);
-        return ads.stream().map(e->modelMapper.map(e, AdDto.class)).collect(Collectors.toList());
+        return ads.stream().map(e -> modelMapper.map(e, AdDto.class)).collect(Collectors.toList());
     }
 
     @ApiOperation(value = "Retrieve all active ads", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -81,6 +83,7 @@ public class UserController {
     @ApiOperation(value = "Insert ad", produces = MediaType.APPLICATION_JSON_VALUE)
     @PostMapping(value = "public/ad")
     public ResponseEntity<String> insertAd(@RequestBody AdDto adDto) {
+        logger.info("Inserting new ad");
         userService.insertAd(adDto);
         return new ResponseEntity<>("Ad inserted successfully!", HttpStatus.CREATED);
 

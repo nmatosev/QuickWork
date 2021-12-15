@@ -30,6 +30,7 @@ public class User implements UserDetails {
     private String email;
     private String password;
     private String role;
+    private String phoneNumber;
 
     @OneToMany(mappedBy = "user")
     List<Ad> ads;
@@ -38,11 +39,12 @@ public class User implements UserDetails {
     @OneToMany(mappedBy = "user")
     List<Review> reviews;
 
-    public User(String username, String email, String encodedPassword, String roleCode) {
+    public User(String username, String email, String encodedPassword, String roleCode, String phoneNumber) {
         this.username = username;
         this.email = email;
         this.password = encodedPassword;
         this.role = roleCode;
+        this.phoneNumber = phoneNumber;
 
     }
 

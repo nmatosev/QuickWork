@@ -27,7 +27,7 @@ public class RegistrationService {
             throw new IllegalStateException("User with that username or email already exists!");
         }
         String encodedPass = bCryptPasswordEncoder.encode(request.getPassword());
-        User user = new User(request.getUsername(), request.getEmail(), encodedPass, request.getRoleCode());
+        User user = new User(request.getUsername(), request.getEmail(), encodedPass, request.getRoleCode(), request.getPhoneNumber());
         userDAO.save(user);
         return "User " + request.getUsername() + " successfully registered";
     }
