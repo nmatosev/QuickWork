@@ -11,4 +11,6 @@ public class ReviewDto {
     private String title;
     private String content;
     private int rating;
+    private String reviewerUsername;
+    private String reviewedUsername;
 }

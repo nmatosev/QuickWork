@@ -1,6 +1,7 @@
 package com.quickwork.service;
 
 import com.quickwork.dtos.AdDto;
+import com.quickwork.dtos.ReviewDto;
 import com.quickwork.dtos.UserDto;
 import com.quickwork.model.Ad;
 import com.quickwork.model.County;
@@ -32,4 +33,7 @@ public interface UserService {
     List<Review> getReviewsByUsername(String username);
 
     List<County> getCounties();
+
+    void insertReview(ReviewDto reviewDto);
+
 }

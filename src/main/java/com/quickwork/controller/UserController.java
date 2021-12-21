@@ -1,6 +1,7 @@
 package com.quickwork.controller;
 
 import com.quickwork.dtos.AdDto;
+import com.quickwork.dtos.ReviewDto;
 import com.quickwork.dtos.UserDto;
 import com.quickwork.model.Ad;
 import com.quickwork.model.County;
@@ -86,6 +87,16 @@ public class UserController {
         logger.info("Inserting new ad");
         userService.insertAd(adDto);
         return new ResponseEntity<>("Ad inserted successfully!", HttpStatus.CREATED);
+
+    }
+
+    //TODO disable this api for non registered users
+    @ApiOperation(value = "Save review", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "public/saveReview")
+    public ResponseEntity<String> insertReview(@RequestBody ReviewDto reviewDto) {
+        logger.info("Inserting new review");
+        userService.insertReview(reviewDto);
+        return new ResponseEntity<>("Review inserted successfully!", HttpStatus.CREATED);
 
     }
 

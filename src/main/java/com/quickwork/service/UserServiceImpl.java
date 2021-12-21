@@ -1,13 +1,12 @@
 package com.quickwork.service;
 
 import com.quickwork.dtos.AdDto;
+import com.quickwork.dtos.ReviewDto;
 import com.quickwork.dtos.UserDto;
-import com.quickwork.model.Ad;
-import com.quickwork.model.County;
-import com.quickwork.model.Review;
-import com.quickwork.model.User;
+import com.quickwork.model.*;
 import com.quickwork.repository.AdDAO;
 import com.quickwork.repository.CountyDAO;
+import com.quickwork.repository.ReviewDAO;
 import com.quickwork.repository.UserDAO;
 import com.quickwork.service.exception.NotFoundException;
 import org.modelmapper.ModelMapper;
@@ -29,14 +28,16 @@ public class UserServiceImpl implements UserService {
     private final UserDAO userDAO;
     private final AdDAO adDAO;
     private final CountyDAO countyDAO;
+    private final ReviewDAO reviewDao;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy.");
     private final ModelMapper modelMapper;
 
 
-    public UserServiceImpl(UserDAO userDAO, AdDAO adDAO, CountyDAO countyDAO, ModelMapper modelMapper) {
+    public UserServiceImpl(UserDAO userDAO, AdDAO adDAO, CountyDAO countyDAO, ReviewDAO reviewDao, ModelMapper modelMapper) {
         this.userDAO = userDAO;
         this.adDAO = adDAO;
         this.countyDAO = countyDAO;
+        this.reviewDao = reviewDao;
         this.modelMapper = modelMapper;
     }
 
@@ -140,6 +141,28 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void insertReview(ReviewDto reviewDto) {
+        Review review = new Review();
+        mapDtoToReview(review, reviewDto);
+        reviewDao.save(review);
+    }
+
+
+    private void mapDtoToReview(Review review, ReviewDto reviewDto) {
+        Optional<User> user = userDAO.findByUsername(reviewDto.getReviewedUsername());
+        if (user.isPresent()) {
+            review.setUser(user.get());
+            review.setContent(reviewDto.getContent());
+            review.setRating(reviewDto.getRating());
+            //TODO fix this
+            review.setRole(RoleCode.USER.name());
+        } else {
+            throw new NotFoundException("User with username " + reviewDto.getReviewedUsername() + " not found!");
+        }
+
+    }
+
+    @Override
     public List<Review> getReviewsByUsername(String username) {
         Optional<User> user = userDAO.findByUsername(username);
         if (user.isPresent()) {
@@ -153,6 +176,7 @@ public class UserServiceImpl implements UserService {
     public List<County> getCounties() {
         return countyDAO.findAll();
     }
+
 
 
     @Override
