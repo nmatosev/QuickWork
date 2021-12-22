@@ -1,14 +1,13 @@
 package com.quickwork.service;
 
 import com.quickwork.dtos.AdDto;
+import com.quickwork.dtos.MessageDto;
 import com.quickwork.dtos.ReviewDto;
 import com.quickwork.dtos.UserDto;
 import com.quickwork.model.*;
-import com.quickwork.repository.AdDAO;
-import com.quickwork.repository.CountyDAO;
-import com.quickwork.repository.ReviewDAO;
-import com.quickwork.repository.UserDAO;
+import com.quickwork.repository.*;
 import com.quickwork.service.exception.NotFoundException;
+import liquibase.pro.packaged.M;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -28,16 +27,18 @@ public class UserServiceImpl implements UserService {
     private final UserDAO userDAO;
     private final AdDAO adDAO;
     private final CountyDAO countyDAO;
-    private final ReviewDAO reviewDao;
+    private final ReviewDAO reviewDAO;
+    private final MessageDAO messageDAO;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy.");
     private final ModelMapper modelMapper;
 
 
-    public UserServiceImpl(UserDAO userDAO, AdDAO adDAO, CountyDAO countyDAO, ReviewDAO reviewDao, ModelMapper modelMapper) {
+    public UserServiceImpl(UserDAO userDAO, AdDAO adDAO, CountyDAO countyDAO, ReviewDAO reviewDao, MessageDAO messageDAO, ModelMapper modelMapper) {
         this.userDAO = userDAO;
         this.adDAO = adDAO;
         this.countyDAO = countyDAO;
-        this.reviewDao = reviewDao;
+        this.reviewDAO = reviewDao;
+        this.messageDAO = messageDAO;
         this.modelMapper = modelMapper;
     }
 
@@ -83,7 +84,7 @@ public class UserServiceImpl implements UserService {
         Date currentDate = new Date(System.currentTimeMillis());
         List<Ad> activeAds = ads.stream().filter(el -> el.getValidUntil().after(currentDate)).collect(Collectors.toList());
         List<AdDto> activeAdDtos = new ArrayList<>();
-        for(Ad ad : activeAds) {
+        for (Ad ad : activeAds) {
             activeAdDtos.add(mapAdToDto(ad));
         }
         return activeAdDtos;
@@ -93,6 +94,7 @@ public class UserServiceImpl implements UserService {
     private AdDto mapAdToDto(Ad ad) {
         AdDto adDto = new AdDto();
         String validUntil = DATE_FORMAT.format(ad.getValidUntil());
+        adDto.setId(ad.getId());
         adDto.setContent(ad.getContent());
         adDto.setTitle(ad.getTitle());
         adDto.setValidUntil(validUntil);
@@ -144,9 +146,8 @@ public class UserServiceImpl implements UserService {
     public void insertReview(ReviewDto reviewDto) {
         Review review = new Review();
         mapDtoToReview(review, reviewDto);
-        reviewDao.save(review);
+        reviewDAO.save(review);
     }
-
 
     private void mapDtoToReview(Review review, ReviewDto reviewDto) {
         Optional<User> user = userDAO.findByUsername(reviewDto.getReviewedUsername());
@@ -163,6 +164,46 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void insertMessage(MessageDto messageDto) {
+        Message message = new Message();
+        mapDtoToMessage(message, messageDto);
+        messageDAO.save(message);
+    }
+
+
+    private void mapDtoToMessage(Message message, MessageDto messageDto) {
+        Optional<User> user = userDAO.findByUsername(messageDto.getSender());
+        Optional<Ad> ad = adDAO.findById(messageDto.getAdId());
+        if (user.isPresent() && ad.isPresent()) {
+            message.setMessage(messageDto.getMessageContent());
+            message.setUser(user.get());
+            message.setAd(ad.get());
+
+        } else {
+            throw new NotFoundException("User with username " + messageDto.getSender() + "or ad with " + messageDto.getAdId() + " not found!");
+        }
+    }
+
+    @Override
+    public List<MessageDto> getUsersMessages(String username) {
+        List<MessageDto> messageDtos = new ArrayList<>();
+        List<Message> messages = messageDAO.findAll();
+        mapMessageToDto(messageDtos, messages);
+        return messageDtos;
+
+    }
+
+    private void mapMessageToDto(List<MessageDto> messageDtos, List<Message> messages) {
+        for (Message message : messages) {
+            MessageDto messageDto = new MessageDto();
+            messageDto.setMessageContent(message.getMessage());
+            messageDto.setSender(message.getUser().getUsername());
+            messageDto.setAdId(message.getAd().getId());
+            messageDtos.add(messageDto);
+        }
+    }
+
+    @Override
     public List<Review> getReviewsByUsername(String username) {
         Optional<User> user = userDAO.findByUsername(username);
         if (user.isPresent()) {
@@ -176,7 +217,6 @@ public class UserServiceImpl implements UserService {
     public List<County> getCounties() {
         return countyDAO.findAll();
     }
-
 
 
     @Override

@@ -1,6 +1,7 @@
 package com.quickwork.service;
 
 import com.quickwork.dtos.AdDto;
+import com.quickwork.dtos.MessageDto;
 import com.quickwork.dtos.ReviewDto;
 import com.quickwork.dtos.UserDto;
 import com.quickwork.model.Ad;
@@ -36,4 +37,7 @@ public interface UserService {
 
     void insertReview(ReviewDto reviewDto);
 
+    void insertMessage(MessageDto messageDto);
+
+    List<MessageDto> getUsersMessages(String username);
 }

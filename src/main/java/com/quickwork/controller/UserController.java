@@ -1,10 +1,12 @@
 package com.quickwork.controller;
 
 import com.quickwork.dtos.AdDto;
+import com.quickwork.dtos.MessageDto;
 import com.quickwork.dtos.ReviewDto;
 import com.quickwork.dtos.UserDto;
 import com.quickwork.model.Ad;
 import com.quickwork.model.County;
+import com.quickwork.model.Message;
 import com.quickwork.model.User;
 import com.quickwork.service.UserService;
 import com.quickwork.utilities.Endpoints;
@@ -75,6 +77,12 @@ public class UserController {
         return ads.stream().map(e -> modelMapper.map(e, AdDto.class)).collect(Collectors.toList());
     }
 
+    @ApiOperation(value = "Retrieve all messages for user", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "public/{username}")
+    public List<MessageDto> getUsersMessages(@PathVariable("username") String username) {
+        return userService.getUsersMessages(username);
+    }
+
     @ApiOperation(value = "Retrieve all active ads", produces = MediaType.APPLICATION_JSON_VALUE)
     @GetMapping(value = "public/ads")
     public List<AdDto> getAds() {
@@ -97,6 +105,16 @@ public class UserController {
         logger.info("Inserting new review");
         userService.insertReview(reviewDto);
         return new ResponseEntity<>("Review inserted successfully!", HttpStatus.CREATED);
+
+    }
+
+    //TODO disable this api for non registered users
+    @ApiOperation(value = "Send message", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "public/sendMessage")
+    public ResponseEntity<String> sendMessage(@RequestBody MessageDto messageDto) {
+        logger.info("Inserting new review");
+        userService.insertMessage(messageDto);
+        return new ResponseEntity<>("Message inserted successfully!", HttpStatus.CREATED);
 
     }
 
