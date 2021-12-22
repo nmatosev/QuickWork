@@ -188,20 +188,29 @@ public class UserServiceImpl implements UserService {
     public List<MessageDto> getUsersMessages(String username) {
         List<MessageDto> messageDtos = new ArrayList<>();
         List<Message> messages = messageDAO.findAll();
-        mapMessageToDto(messageDtos, messages);
+        mapMessageToDto(messageDtos, messages, username);
         return messageDtos;
 
     }
 
-    private void mapMessageToDto(List<MessageDto> messageDtos, List<Message> messages) {
-        for (Message message : messages) {
-            MessageDto messageDto = new MessageDto();
-            messageDto.setMessageContent(message.getMessage());
-            messageDto.setSender(message.getUser().getUsername());
-            messageDto.setAdId(message.getAd().getId());
-            messageDtos.add(messageDto);
+    private void mapMessageToDto(List<MessageDto> messageDtos, List<Message> messages, String username) {
+        Optional<User> user = userDAO.findByUsername(username);
+        if (user.isPresent()) {
+            //return messages if receiver is found
+            for (Message message : messages) {
+                if (message.getAd().getUser().getUsername().equals(username)) {
+                    MessageDto messageDto = new MessageDto();
+                    messageDto.setMessageContent(message.getMessage());
+                    messageDto.setSender(message.getUser().getUsername());
+                    messageDto.setAdId(message.getAd().getId());
+                    messageDtos.add(messageDto);
+                }
+            }
+        } else {
+            throw new NotFoundException("User with username " + username + " not found!");
         }
     }
+
 
     @Override
     public List<Review> getReviewsByUsername(String username) {
