@@ -30,6 +30,7 @@ public class ExceptionHandler {
     public ResponseEntity<Object> handleEverythingElse(Throwable e) {
         ApiError responseMessage = ApiError.builder().timestamp(OffsetDateTime.now()).message(e.getMessage()).build();
         //esponseMessage.setDetails(Arrays.asList(e.getStackTrace()).toString());
+        responseMessage.setMessage(e.getMessage());
         HttpStatus responseStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         return new ResponseEntity<>(responseMessage, responseStatus);
     }

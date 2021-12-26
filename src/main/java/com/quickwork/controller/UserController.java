@@ -1,12 +1,8 @@
 package com.quickwork.controller;
 
-import com.quickwork.dtos.AdDto;
-import com.quickwork.dtos.MessageDto;
-import com.quickwork.dtos.ReviewDto;
-import com.quickwork.dtos.UserDto;
+import com.quickwork.dtos.*;
 import com.quickwork.model.Ad;
 import com.quickwork.model.County;
-import com.quickwork.model.Message;
 import com.quickwork.model.User;
 import com.quickwork.service.UserService;
 import com.quickwork.utilities.Endpoints;
@@ -25,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,10 +74,17 @@ public class UserController {
         return ads.stream().map(e -> modelMapper.map(e, AdDto.class)).collect(Collectors.toList());
     }
 
+
+/*    @ApiOperation(value = "Retrieve all messages for user", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "public/{username}")
+    public Set<Map.Entry<Long, AdMessages>> getUsersMessages1(@PathVariable("username") String username) {
+        return userService.getUsersAdMessages(username).entrySet();
+    }*/
+
     @ApiOperation(value = "Retrieve all messages for user", produces = MediaType.APPLICATION_JSON_VALUE)
     @GetMapping(value = "public/{username}")
-    public List<MessageDto> getUsersMessages(@PathVariable("username") String username) {
-        return userService.getUsersMessages(username);
+    public Collection<AdMessages> getUsersMessages(@PathVariable("username") String username) {
+        return userService.getUsersAdMessages(username).values();
     }
 
     @ApiOperation(value = "Retrieve all active ads", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -111,9 +115,9 @@ public class UserController {
     //TODO disable this api for non registered users
     @ApiOperation(value = "Send message", produces = MediaType.APPLICATION_JSON_VALUE)
     @PostMapping(value = "public/sendMessage")
-    public ResponseEntity<String> sendMessage(@RequestBody MessageDto messageDto) {
-        logger.info("Inserting new review");
-        userService.insertMessage(messageDto);
+    public ResponseEntity<String> sendMessage(@RequestBody MessageRequest messageRequest) {
+        logger.info("Inserting new message");
+        userService.insertMessage(messageRequest);
         return new ResponseEntity<>("Message inserted successfully!", HttpStatus.CREATED);
 
     }

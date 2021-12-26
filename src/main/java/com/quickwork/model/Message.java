@@ -15,6 +15,7 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     String message;
+    private boolean seen;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sender_id", nullable = false)
     private User user;

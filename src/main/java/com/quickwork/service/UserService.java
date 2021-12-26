@@ -1,15 +1,13 @@
 package com.quickwork.service;
 
-import com.quickwork.dtos.AdDto;
-import com.quickwork.dtos.MessageDto;
-import com.quickwork.dtos.ReviewDto;
-import com.quickwork.dtos.UserDto;
+import com.quickwork.dtos.*;
 import com.quickwork.model.Ad;
 import com.quickwork.model.County;
 import com.quickwork.model.Review;
 import com.quickwork.model.User;
 
 import java.util.List;
+import java.util.Map;
 
 public interface UserService {
 
@@ -37,7 +35,9 @@ public interface UserService {
 
     void insertReview(ReviewDto reviewDto);
 
-    void insertMessage(MessageDto messageDto);
+    void insertMessage(MessageRequest messageDto);
 
     List<MessageDto> getUsersMessages(String username);
+
+    Map<Long, AdMessages> getUsersAdMessages(String username);
 }

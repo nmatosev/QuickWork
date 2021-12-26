@@ -5,10 +5,9 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MessageDto {
+public class MessageRequest {
 
     String messageContent;
     String sender;
-    //AdDto adDto;
     long adId;
 }

@@ -1,21 +1,14 @@
 package com.quickwork.service;
 
-import com.quickwork.dtos.AdDto;
-import com.quickwork.dtos.MessageDto;
-import com.quickwork.dtos.ReviewDto;
-import com.quickwork.dtos.UserDto;
+import com.quickwork.dtos.*;
 import com.quickwork.model.*;
 import com.quickwork.repository.*;
 import com.quickwork.service.exception.NotFoundException;
-import liquibase.pro.packaged.M;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -164,23 +157,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void insertMessage(MessageDto messageDto) {
+    public void insertMessage(MessageRequest messageDto) {
         Message message = new Message();
-        mapDtoToMessage(message, messageDto);
+        mapRequestToMessage(message, messageDto);
         messageDAO.save(message);
     }
 
 
-    private void mapDtoToMessage(Message message, MessageDto messageDto) {
-        Optional<User> user = userDAO.findByUsername(messageDto.getSender());
-        Optional<Ad> ad = adDAO.findById(messageDto.getAdId());
+    private void mapRequestToMessage(Message message, MessageRequest messageRequest) {
+
+        assert messageRequest.getMessageContent()!=null;
+        Optional<User> user = userDAO.findByUsername(messageRequest.getSender());
+        Optional<Ad> ad = adDAO.findById(messageRequest.getAdId());
         if (user.isPresent() && ad.isPresent()) {
-            message.setMessage(messageDto.getMessageContent());
+            message.setMessage(messageRequest.getMessageContent());
             message.setUser(user.get());
             message.setAd(ad.get());
-
+            message.setSeen(false);
         } else {
-            throw new NotFoundException("User with username " + messageDto.getSender() + "or ad with " + messageDto.getAdId() + " not found!");
+            throw new NotFoundException("User with username " + messageRequest.getSender() + "or ad with " + messageRequest.getAdId() + " not found!");
         }
     }
 
@@ -193,16 +188,50 @@ public class UserServiceImpl implements UserService {
 
     }
 
+
+    public Map<Long, AdMessages> getUsersAdMessages(String username) {
+        Map<Long, AdMessages> adMessagesMap = new HashMap<>();
+        List<Message> messages = messageDAO.findAll();
+        List<MessageDto> messageDtos = new ArrayList<>();
+        Optional<User> user = userDAO.findByUsername(username);
+        if (user.isPresent()) {
+
+            for(Message message: messages) {
+                //find by receiver/the one who created the ad
+                if (message.getAd().getUser().getUsername().equals(username)) {
+                    AdMessages adMessages = new AdMessages();
+                    adMessages.setAdId(message.getAd().getId());
+                    adMessages.setTitle(message.getAd().getTitle());
+                    adMessages.setContent(message.getAd().getContent());
+                    adMessagesMap.put(message.getAd().getId(), adMessages);
+                }
+            }
+            mapMessageToDto(messageDtos, messages, username);
+            for(MessageDto messageDto: messageDtos) {
+                if(adMessagesMap.containsKey(messageDto.getAdId())) {
+                    //all messages for this ad
+                    AdMessages adMessages = adMessagesMap.get(messageDto.getAdId());
+                    adMessages.getMessages().add(messageDto);
+                }
+            }
+        }
+        //mapMessageToDto(messageDtos, messages, username);
+        return adMessagesMap;
+
+    }
+
     private void mapMessageToDto(List<MessageDto> messageDtos, List<Message> messages, String username) {
         Optional<User> user = userDAO.findByUsername(username);
         if (user.isPresent()) {
             //return messages if receiver is found
             for (Message message : messages) {
                 if (message.getAd().getUser().getUsername().equals(username)) {
+                    AdDto adDto = mapAdToDto(message.getAd());
                     MessageDto messageDto = new MessageDto();
                     messageDto.setMessageContent(message.getMessage());
                     messageDto.setSender(message.getUser().getUsername());
                     messageDto.setAdId(message.getAd().getId());
+                    //messageDto.setAdDto(adDto);
                     messageDtos.add(messageDto);
                 }
             }
