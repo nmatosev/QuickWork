@@ -75,17 +75,19 @@ public class UserController {
     }
 
 
-/*    @ApiOperation(value = "Retrieve all messages for user", produces = MediaType.APPLICATION_JSON_VALUE)
-    @GetMapping(value = "public/{username}")
-    public Set<Map.Entry<Long, AdMessages>> getUsersMessages1(@PathVariable("username") String username) {
-        return userService.getUsersAdMessages(username).entrySet();
-    }*/
-
     @ApiOperation(value = "Retrieve all messages for user", produces = MediaType.APPLICATION_JSON_VALUE)
     @GetMapping(value = "public/{username}")
     public Collection<AdMessages> getUsersMessages(@PathVariable("username") String username) {
         return userService.getUsersAdMessages(username).values();
     }
+
+
+    @ApiOperation(value = "Retrieve all messages for user on ad", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "public/{adId}/{username}")
+    public List<MessageDto> getUsersMessagesOnAd(@PathVariable("username") long adId, @PathVariable("username") String username) {
+        return userService.getUsersAdMessagesOnAd(adId, username);
+    }
+
 
     @ApiOperation(value = "Retrieve all active ads", produces = MediaType.APPLICATION_JSON_VALUE)
     @GetMapping(value = "public/ads")

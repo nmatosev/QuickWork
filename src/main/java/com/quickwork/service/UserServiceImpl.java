@@ -23,6 +23,7 @@ public class UserServiceImpl implements UserService {
     private final ReviewDAO reviewDAO;
     private final MessageDAO messageDAO;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy.");
+    private static final SimpleDateFormat DATE_FORMAT_WEEK_DAY = new SimpleDateFormat("EEE");
     private final ModelMapper modelMapper;
 
 
@@ -220,17 +221,29 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    @Override
+    public List<MessageDto> getUsersAdMessagesOnAd(long adId, String username) {
+        List<Message> messages = messageDAO.findAll();
+        List<MessageDto> messageDtos = new ArrayList<>();
+        Optional<User> user = userDAO.findByUsername(username);
+        if (user.isPresent()) {
+
+        }
+        return null;
+    }
+
     private void mapMessageToDto(List<MessageDto> messageDtos, List<Message> messages, String username) {
         Optional<User> user = userDAO.findByUsername(username);
         if (user.isPresent()) {
             //return messages if receiver is found
             for (Message message : messages) {
                 if (message.getAd().getUser().getUsername().equals(username)) {
-                    AdDto adDto = mapAdToDto(message.getAd());
                     MessageDto messageDto = new MessageDto();
                     messageDto.setMessageContent(message.getMessage());
                     messageDto.setSender(message.getUser().getUsername());
                     messageDto.setAdId(message.getAd().getId());
+                    String weekDay = DATE_FORMAT_WEEK_DAY.format(message.getCreatedDate());
+                    messageDto.setWeekDay(weekDay);
                     //messageDto.setAdDto(adDto);
                     messageDtos.add(messageDto);
                 }

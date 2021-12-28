@@ -9,6 +9,6 @@ public class MessageDto {
 
     String messageContent;
     String sender;
-    //AdDto adDto;
+    String weekDay;
     long adId;
 }

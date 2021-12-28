@@ -40,4 +40,6 @@ public interface UserService {
     List<MessageDto> getUsersMessages(String username);
 
     Map<Long, AdMessages> getUsersAdMessages(String username);
+
+    List<MessageDto> getUsersAdMessagesOnAd(long adId, String username);
 }

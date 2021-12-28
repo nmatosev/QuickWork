@@ -26,12 +26,12 @@ public class ExceptionHandler {
         return new ResponseEntity<>(apiError, responseStatus);
     }
 
-    @org.springframework.web.bind.annotation.ExceptionHandler({Throwable.class})
+/*    @org.springframework.web.bind.annotation.ExceptionHandler({Throwable.class})
     public ResponseEntity<Object> handleEverythingElse(Throwable e) {
         ApiError responseMessage = ApiError.builder().timestamp(OffsetDateTime.now()).message(e.getMessage()).build();
         //esponseMessage.setDetails(Arrays.asList(e.getStackTrace()).toString());
         responseMessage.setMessage(e.getMessage());
         HttpStatus responseStatus = HttpStatus.INTERNAL_SERVER_ERROR;
         return new ResponseEntity<>(responseMessage, responseStatus);
-    }
+    }*/
 }
