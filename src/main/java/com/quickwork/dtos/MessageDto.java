@@ -8,7 +8,8 @@ import lombok.Setter;
 public class MessageDto {
 
     String messageContent;
-    String sender;
+    String user1;
+    String user2;
     String weekDay;
     long adId;
 }

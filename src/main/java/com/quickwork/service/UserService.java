@@ -37,9 +37,5 @@ public interface UserService {
 
     void insertMessage(MessageRequest messageDto);
 
-    List<MessageDto> getUsersMessages(String username);
-
-    Map<Long, AdMessages> getUsersAdMessages(String username);
-
-    List<MessageDto> getUsersAdMessagesOnAd(long adId, String username);
+    Map<Long, AdChat> getUsersAdMessages(String username);
 }

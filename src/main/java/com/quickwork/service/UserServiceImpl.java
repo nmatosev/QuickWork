@@ -4,6 +4,8 @@ import com.quickwork.dtos.*;
 import com.quickwork.model.*;
 import com.quickwork.repository.*;
 import com.quickwork.service.exception.NotFoundException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +28,7 @@ public class UserServiceImpl implements UserService {
     private static final SimpleDateFormat DATE_FORMAT_WEEK_DAY = new SimpleDateFormat("EEE");
     private final ModelMapper modelMapper;
 
+    protected final Log logger = LogFactory.getLog(this.getClass());
 
     public UserServiceImpl(UserDAO userDAO, AdDAO adDAO, CountyDAO countyDAO, ReviewDAO reviewDao, MessageDAO messageDAO, ModelMapper modelMapper) {
         this.userDAO = userDAO;
@@ -167,86 +170,69 @@ public class UserServiceImpl implements UserService {
 
     private void mapRequestToMessage(Message message, MessageRequest messageRequest) {
 
-        assert messageRequest.getMessageContent()!=null;
-        Optional<User> user = userDAO.findByUsername(messageRequest.getSender());
+        assert messageRequest.getMessageContent() != null;
+        Optional<User> user1 = userDAO.findByUsername(messageRequest.getSender());
         Optional<Ad> ad = adDAO.findById(messageRequest.getAdId());
-        if (user.isPresent() && ad.isPresent()) {
+
+
+        if (user1.isPresent() && ad.isPresent()) {
             message.setMessage(messageRequest.getMessageContent());
-            message.setUser(user.get());
+            message.setUser1(user1.get());
+            message.setUser2(ad.get().getUser());
             message.setAd(ad.get());
-            message.setSeen(false);
         } else {
+            logger.warn("User with username " + messageRequest.getSender() + " or ad with " + messageRequest.getAdId() + " id not found!");
             throw new NotFoundException("User with username " + messageRequest.getSender() + "or ad with " + messageRequest.getAdId() + " not found!");
         }
     }
 
-    @Override
-    public List<MessageDto> getUsersMessages(String username) {
-        List<MessageDto> messageDtos = new ArrayList<>();
-        List<Message> messages = messageDAO.findAll();
-        mapMessageToDto(messageDtos, messages, username);
-        return messageDtos;
-
-    }
 
 
-    public Map<Long, AdMessages> getUsersAdMessages(String username) {
-        Map<Long, AdMessages> adMessagesMap = new HashMap<>();
+    public Map<Long, AdChat> getUsersAdMessages(String username) {
+        Map<Long, AdChat> adChats = new HashMap<>();
         List<Message> messages = messageDAO.findAll();
         List<MessageDto> messageDtos = new ArrayList<>();
         Optional<User> user = userDAO.findByUsername(username);
         if (user.isPresent()) {
-
-            for(Message message: messages) {
+            for (Message message : messages) {
                 //find by receiver/the one who created the ad
-                if (message.getAd().getUser().getUsername().equals(username)) {
-                    AdMessages adMessages = new AdMessages();
-                    adMessages.setAdId(message.getAd().getId());
-                    adMessages.setTitle(message.getAd().getTitle());
-                    adMessages.setContent(message.getAd().getContent());
-                    adMessagesMap.put(message.getAd().getId(), adMessages);
+                if (message.getUser1().getUsername().equals(username) || message.getUser2().getUsername().equals(username)) {
+                    AdChat adChat = new AdChat();
+                    adChat.setAdId(message.getAd().getId());
+                    adChat.setTitle(message.getAd().getTitle());
+                    adChat.setContent(message.getAd().getContent());
+                    adChats.put(message.getAd().getId(), adChat);
                 }
             }
             mapMessageToDto(messageDtos, messages, username);
-            for(MessageDto messageDto: messageDtos) {
-                if(adMessagesMap.containsKey(messageDto.getAdId())) {
+            for (MessageDto messageDto : messageDtos) {
+                if (adChats.containsKey(messageDto.getAdId())) {
                     //all messages for this ad
-                    AdMessages adMessages = adMessagesMap.get(messageDto.getAdId());
-                    adMessages.getMessages().add(messageDto);
+                    AdChat adChat = adChats.get(messageDto.getAdId());
+                    adChat.getMessages().add(messageDto);
                 }
             }
         }
-        //mapMessageToDto(messageDtos, messages, username);
-        return adMessagesMap;
-
+        return adChats;
     }
 
-    @Override
-    public List<MessageDto> getUsersAdMessagesOnAd(long adId, String username) {
-        List<Message> messages = messageDAO.findAll();
-        List<MessageDto> messageDtos = new ArrayList<>();
-        Optional<User> user = userDAO.findByUsername(username);
-        if (user.isPresent()) {
 
-        }
-        return null;
-    }
 
     private void mapMessageToDto(List<MessageDto> messageDtos, List<Message> messages, String username) {
         Optional<User> user = userDAO.findByUsername(username);
         if (user.isPresent()) {
             //return messages if receiver is found
             for (Message message : messages) {
-                if (message.getAd().getUser().getUsername().equals(username)) {
-                    MessageDto messageDto = new MessageDto();
-                    messageDto.setMessageContent(message.getMessage());
-                    messageDto.setSender(message.getUser().getUsername());
-                    messageDto.setAdId(message.getAd().getId());
-                    String weekDay = DATE_FORMAT_WEEK_DAY.format(message.getCreatedDate());
-                    messageDto.setWeekDay(weekDay);
-                    //messageDto.setAdDto(adDto);
-                    messageDtos.add(messageDto);
-                }
+                MessageDto messageDto = new MessageDto();
+                messageDto.setMessageContent(message.getMessage());
+                messageDto.setUser1(message.getUser1().getUsername());
+                messageDto.setUser2(message.getUser2().getUsername());
+                messageDto.setAdId(message.getAd().getId());
+                String weekDay = DATE_FORMAT_WEEK_DAY.format(message.getCreatedDate());
+                messageDto.setWeekDay(weekDay);
+                //messageDto.setAdDto(adDto);
+                messageDtos.add(messageDto);
+
             }
         } else {
             throw new NotFoundException("User with username " + username + " not found!");

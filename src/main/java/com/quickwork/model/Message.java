@@ -17,10 +17,13 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
     String message;
-    private boolean seen;
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "sender_id", nullable = false)
-    private User user;
+    @JoinColumn(name = "user1_id", nullable = false)
+    private User user1;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user2_id", nullable = false)
+    private User user2;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ad_id", nullable = false)

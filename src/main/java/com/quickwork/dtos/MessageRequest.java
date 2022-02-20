@@ -9,5 +9,6 @@ public class MessageRequest {
 
     String messageContent;
     String sender;
+    String receiver;
     long adId;
 }

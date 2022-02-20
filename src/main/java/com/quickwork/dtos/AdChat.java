@@ -8,7 +8,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class AdMessages {
+public class AdChat {
 
     private long adId;
     private String title;

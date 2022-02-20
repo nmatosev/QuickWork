@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -77,16 +77,19 @@ public class UserController {
 
     @ApiOperation(value = "Retrieve all messages for user", produces = MediaType.APPLICATION_JSON_VALUE)
     @GetMapping(value = "public/{username}")
-    public Collection<AdMessages> getUsersMessages(@PathVariable("username") String username) {
-        return userService.getUsersAdMessages(username).values();
+    public List<AdChat> getUsersMessages(@PathVariable("username") String username) {
+        logger.info(userService.getUsersAdMessages(username).values());
+        List<AdChat> msgs = new ArrayList<>(userService.getUsersAdMessages(username).values());
+        return msgs;
+
     }
 
 
-    @ApiOperation(value = "Retrieve all messages for user on ad", produces = MediaType.APPLICATION_JSON_VALUE)
+/*    @ApiOperation(value = "Retrieve all messages for user on ad", produces = MediaType.APPLICATION_JSON_VALUE)
     @GetMapping(value = "public/{adId}/{username}")
     public List<MessageDto> getUsersMessagesOnAd(@PathVariable("username") long adId, @PathVariable("username") String username) {
         return userService.getUsersAdMessagesOnAd(adId, username);
-    }
+    }*/
 
 
     @ApiOperation(value = "Retrieve all active ads", produces = MediaType.APPLICATION_JSON_VALUE)
