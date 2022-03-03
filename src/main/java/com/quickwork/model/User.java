@@ -6,12 +6,7 @@ import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Collection;
 import java.util.List;
 
@@ -38,6 +33,10 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     List<Review> reviews;
+
+    //TODO change this to one to one
+    @OneToMany(mappedBy = "user")
+    List<ProfilePic> profilePic;
 
     public User(String username, String email, String encodedPassword, String roleCode, String phoneNumber) {
         this.username = username;

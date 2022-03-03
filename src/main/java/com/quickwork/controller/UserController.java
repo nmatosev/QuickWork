@@ -3,6 +3,7 @@ package com.quickwork.controller;
 import com.quickwork.dtos.*;
 import com.quickwork.model.Ad;
 import com.quickwork.model.County;
+import com.quickwork.model.ProfilePic;
 import com.quickwork.model.User;
 import com.quickwork.service.UserService;
 import com.quickwork.utilities.Endpoints;
@@ -10,17 +11,16 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.ResponseEntity.BodyBuilder;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -79,8 +79,7 @@ public class UserController {
     @GetMapping(value = "public/{username}")
     public List<AdChat> getUsersMessages(@PathVariable("username") String username) {
         logger.info(userService.getUsersAdMessages(username).values());
-        List<AdChat> msgs = new ArrayList<>(userService.getUsersAdMessages(username).values());
-        return msgs;
+        return new ArrayList<>(userService.getUsersAdMessages(username).values());
 
     }
 
@@ -127,6 +126,35 @@ public class UserController {
 
     }
 
+    @ApiOperation(value = "Upload profile picture")
+    @PostMapping(value = "public/upload", headers = ("content-type=multipart/*"), consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> uploadProfilePic(@RequestParam("imageFile") MultipartFile file, HttpServletResponse httpServletResponse)
+            throws IOException {
+        logger.info("Uploading new profile picture for user " + file.getResource().getFilename());
+
+        userService.setProfilePicture(file.getResource().getFilename(), file);
+        return new ResponseEntity<>("pic uploaded successfully!", HttpStatus.OK);
+
+    }
+/*    @ApiOperation(value = "Upload profile picture")
+    @PostMapping(value = "public/upload", headers = ("content-type=multipart/*"), consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<String> uploadProfilePic(@RequestBody ImageRequest imageRequest)
+            throws IOException {
+        logger.info("Uploading new profile picture for user " + imageRequest.getUser());
+
+        userService.setProfilePicture(imageRequest);
+        return new ResponseEntity<>("pic uploaded successfully!", HttpStatus.OK);
+    }*/
+
+/*    @ApiOperation(value = "Upload profile picture")
+    @PostMapping(value = "public/upload", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<String> uploadProfilePic(@RequestPart("user") String user, @RequestParam("imageFile") MultipartFile file)
+            throws IOException {
+        logger.info("Uploading new profile picture for user " + user);
+        userService.setProfilePicture(user, file);
+        return new ResponseEntity<>("pic uploaded successfully!", HttpStatus.OK);
+    }*/
+
     @ApiOperation(value = "Delete ad", produces = MediaType.APPLICATION_JSON_VALUE)
     @DeleteMapping(value = "public/ad/{id}")
     public ResponseEntity<String> deleteAd(@PathVariable("id") long id) {
@@ -140,6 +168,13 @@ public class UserController {
     @GetMapping(value = "public/counties")
     public List<County> getCounties() {
         return userService.getCounties();
+    }
+
+
+    @ApiOperation(value = "Get profile picture", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "public/profilePicture/{username}")
+    public ProfilePic getProfilePicture(@PathVariable("username") String username) {
+        return userService.getProfilePicture(username);
     }
 
 }

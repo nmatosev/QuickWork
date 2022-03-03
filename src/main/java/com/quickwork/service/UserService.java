@@ -1,11 +1,11 @@
 package com.quickwork.service;
 
 import com.quickwork.dtos.*;
-import com.quickwork.model.Ad;
-import com.quickwork.model.County;
-import com.quickwork.model.Review;
-import com.quickwork.model.User;
+import com.quickwork.model.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -38,4 +38,10 @@ public interface UserService {
     void insertMessage(MessageRequest messageDto);
 
     Map<Long, AdChat> getUsersAdMessages(String username);
+
+    void setProfilePicture(String username, MultipartFile file) throws IOException;
+
+    void setProfilePicture(ImageRequest imageRequest) throws IOException;
+
+   ProfilePic getProfilePicture(String username);
 }

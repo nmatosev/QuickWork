@@ -8,10 +8,18 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 /**
  * Provides service for interacting with user JPA repositories.
@@ -24,18 +32,20 @@ public class UserServiceImpl implements UserService {
     private final CountyDAO countyDAO;
     private final ReviewDAO reviewDAO;
     private final MessageDAO messageDAO;
+    private final ProfilePicDAO profilePicDAO;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd.MM.yyyy.");
     private static final SimpleDateFormat DATE_FORMAT_WEEK_DAY = new SimpleDateFormat("EEE");
     private final ModelMapper modelMapper;
 
     protected final Log logger = LogFactory.getLog(this.getClass());
 
-    public UserServiceImpl(UserDAO userDAO, AdDAO adDAO, CountyDAO countyDAO, ReviewDAO reviewDao, MessageDAO messageDAO, ModelMapper modelMapper) {
+    public UserServiceImpl(UserDAO userDAO, AdDAO adDAO, CountyDAO countyDAO, ReviewDAO reviewDao, MessageDAO messageDAO, ProfilePicDAO profilePicDAO, ModelMapper modelMapper) {
         this.userDAO = userDAO;
         this.adDAO = adDAO;
         this.countyDAO = countyDAO;
         this.reviewDAO = reviewDao;
         this.messageDAO = messageDAO;
+        this.profilePicDAO = profilePicDAO;
         this.modelMapper = modelMapper;
     }
 
@@ -163,18 +173,21 @@ public class UserServiceImpl implements UserService {
     @Override
     public void insertMessage(MessageRequest messageDto) {
         Message message = new Message();
-        mapRequestToMessage(message, messageDto);
+        if (messageDto.getReceiver() == null) {
+            mapRequestToMessageModal(message, messageDto);
+        } else {
+            mapRequestToMessageChat(message, messageDto);
+        }
         messageDAO.save(message);
     }
 
 
-    private void mapRequestToMessage(Message message, MessageRequest messageRequest) {
+    private void mapRequestToMessageModal(Message message, MessageRequest messageRequest) {
 
         assert messageRequest.getMessageContent() != null;
         Optional<User> user1 = userDAO.findByUsername(messageRequest.getSender());
         Optional<Ad> ad = adDAO.findById(messageRequest.getAdId());
-
-
+        //if chat is initiated
         if (user1.isPresent() && ad.isPresent()) {
             message.setMessage(messageRequest.getMessageContent());
             message.setUser1(user1.get());
@@ -186,6 +199,30 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    private void mapRequestToMessageChat(Message message, MessageRequest messageRequest) {
+
+        assert messageRequest.getMessageContent() != null;
+        Optional<User> user1 = userDAO.findByUsername(messageRequest.getSender());
+        Optional<User> user2 = userDAO.findByUsername(messageRequest.getReceiver());
+        Optional<Ad> ad = adDAO.findById(messageRequest.getAdId());
+
+        if (user1.isPresent() && user2.isPresent() && ad.isPresent()) {
+            //if ad owner sends message
+            message.setMessage(messageRequest.getMessageContent());
+            message.setUser1(user1.get());
+            message.setUser2(user2.get());
+            message.setAd(ad.get());
+        } else if (user1.isPresent() && user2.isEmpty() && ad.isPresent()) {
+            //if chat initator sends message
+            message.setMessage(messageRequest.getMessageContent());
+            message.setUser1(user1.get());
+            message.setUser2(ad.get().getUser());
+            message.setAd(ad.get());
+        } else {
+            logger.warn("User with username " + messageRequest.getSender() + " or ad with " + messageRequest.getAdId() + " id not found!");
+            throw new NotFoundException("User with username " + messageRequest.getSender() + "or ad with " + messageRequest.getAdId() + " not found!");
+        }
+    }
 
 
     public Map<Long, AdChat> getUsersAdMessages(String username) {
@@ -215,7 +252,6 @@ public class UserServiceImpl implements UserService {
         }
         return adChats;
     }
-
 
 
     private void mapMessageToDto(List<MessageDto> messageDtos, List<Message> messages, String username) {
@@ -299,4 +335,91 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+
+    @Override
+    public void setProfilePicture(String username, MultipartFile file) throws IOException {
+        Optional<User> user = userDAO.findByUsername(username);
+        if (user.isPresent()) {
+            byte[] byteArr = file.getBytes();
+            //InputStream inputStream = new ByteArrayInputStream(byteArr);
+            ProfilePic profilePic = new ProfilePic();
+            profilePic.setName(file.getOriginalFilename());
+            profilePic.setUser(user.get());
+            profilePic.setPicByte(compressBytes(byteArr));
+
+            profilePicDAO.save(profilePic);
+        }
+
+
+    }
+
+    @Override
+    public ProfilePic getProfilePicture(String username) {
+        Optional<User> user = userDAO.findByUsername(username);
+        logger.info("Getting profile pic for " + username );
+        if(user.isPresent()) {
+            ProfilePic profilePic = user.get().getProfilePic().get(0);
+            profilePic.setPicByte(decompressBytes(profilePic.getPicByte()));
+            return profilePic;
+        }
+        logger.info("profile pic not found");
+
+        return null;
+    }
+
+    @Override
+    public void setProfilePicture(ImageRequest imageRequest) throws IOException {
+        Optional<User> user = userDAO.findByUsername(imageRequest.getUser());
+        if (user.isPresent()) {
+            byte[] byteArr = imageRequest.getUploadImageData().getBytes();
+            //InputStream inputStream = new ByteArrayInputStream(byteArr);
+            ProfilePic profilePic = new ProfilePic();
+            profilePic.setName(imageRequest.getUploadImageData().getOriginalFilename());
+            profilePic.setUser(user.get());
+            profilePic.setPicByte(compressBytes(byteArr));
+
+            profilePicDAO.save(profilePic);
+        }
+    }
+
+    // compress the image bytes before storing it in the database
+    public static byte[] compressBytes(byte[] data) {
+        Deflater deflater = new Deflater();
+        deflater.setInput(data);
+        deflater.finish();
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
+        byte[] buffer = new byte[1024];
+        while (!deflater.finished()) {
+            int count = deflater.deflate(buffer);
+            outputStream.write(buffer, 0, count);
+        }
+        try {
+            outputStream.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Compressed Image Byte Size - " + outputStream.toByteArray().length);
+
+        return outputStream.toByteArray();
+    }
+
+
+    // uncompress the image bytes before returning it to the angular application
+    public static byte[] decompressBytes(byte[] data) {
+        Inflater inflater = new Inflater();
+        inflater.setInput(data);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
+        byte[] buffer = new byte[1024];
+        try {
+            while (!inflater.finished()) {
+                int count = inflater.inflate(buffer);
+                outputStream.write(buffer, 0, count);
+            }
+            outputStream.close();
+        } catch (IOException | DataFormatException ioe) {
+            ioe.printStackTrace();
+        }
+        return outputStream.toByteArray();
+    }
 }
