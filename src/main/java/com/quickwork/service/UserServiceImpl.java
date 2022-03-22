@@ -354,17 +354,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ProfilePic getProfilePicture(String username) {
+    public ProfilePictureDto getProfilePicture(String username) {
         Optional<User> user = userDAO.findByUsername(username);
         logger.info("Getting profile pic for " + username );
         if(user.isPresent()) {
             ProfilePic profilePic = user.get().getProfilePic().get(0);
             profilePic.setPicByte(decompressBytes(profilePic.getPicByte()));
-            return profilePic;
+            return convertToDto(profilePic);
         }
-        logger.info("profile pic not found");
+        logger.info("Profile picture for user " + username + " not found");
 
         return null;
+    }
+
+    private ProfilePictureDto convertToDto(ProfilePic profilePic) {
+        ProfilePictureDto profilePictureDto = new ProfilePictureDto();
+        StringBuilder base64 = new StringBuilder("data:image/png;base64,");
+        base64.append(Base64.getEncoder().encodeToString(profilePic.getPicByte()));
+        profilePictureDto.setPicByte(base64.toString());
+        return profilePictureDto;
     }
 
     @Override

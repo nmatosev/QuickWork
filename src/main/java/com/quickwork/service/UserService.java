@@ -43,5 +43,5 @@ public interface UserService {
 
     void setProfilePicture(ImageRequest imageRequest) throws IOException;
 
-   ProfilePic getProfilePicture(String username);
+   ProfilePictureDto getProfilePicture(String username);
 }

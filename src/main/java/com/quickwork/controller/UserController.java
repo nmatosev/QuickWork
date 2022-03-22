@@ -170,11 +170,13 @@ public class UserController {
         return userService.getCounties();
     }
 
-
+    @CrossOrigin(origins = "http://localhost:4200")
     @ApiOperation(value = "Get profile picture", produces = MediaType.APPLICATION_JSON_VALUE)
-    @GetMapping(value = "public/profilePicture/{username}")
-    public ProfilePic getProfilePicture(@PathVariable("username") String username) {
-        return userService.getProfilePicture(username);
+    @GetMapping(value = "public/profilePicture")
+    //public ProfilePic getProfilePicture(@RequestParam("username") String username) {
+    public ProfilePictureDto getProfilePicture() {
+        String username1 = "lara";
+        return userService.getProfilePicture(username1);
     }
 
 }
