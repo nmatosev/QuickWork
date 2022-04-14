@@ -3,7 +3,6 @@ package com.quickwork.controller;
 import com.quickwork.dtos.*;
 import com.quickwork.model.Ad;
 import com.quickwork.model.County;
-import com.quickwork.model.ProfilePic;
 import com.quickwork.model.User;
 import com.quickwork.service.UserService;
 import com.quickwork.utilities.Endpoints;
@@ -11,13 +10,11 @@ import io.swagger.annotations.ApiOperation;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.modelmapper.ModelMapper;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.ResponseEntity.BodyBuilder;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -126,6 +123,14 @@ public class UserController {
 
     }
 
+    @CrossOrigin(origins = "http://localhost:4200")
+    @ApiOperation(value = "Get profile picture", produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "public/profilePicture")
+    public ProfilePictureDto getProfilePicture(@RequestBody ProfilePictureRequest profilePictureRequest) {
+        return userService.getProfilePicture(profilePictureRequest.getUsername());
+    }
+
+
     @ApiOperation(value = "Upload profile picture")
     @PostMapping(value = "public/upload", headers = ("content-type=multipart/*"), consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<String> uploadProfilePic(@RequestParam("imageFile") MultipartFile file, HttpServletResponse httpServletResponse)
@@ -170,13 +175,5 @@ public class UserController {
         return userService.getCounties();
     }
 
-    @CrossOrigin(origins = "http://localhost:4200")
-    @ApiOperation(value = "Get profile picture", produces = MediaType.APPLICATION_JSON_VALUE)
-    @GetMapping(value = "public/profilePicture")
-    //public ProfilePic getProfilePicture(@RequestParam("username") String username) {
-    public ProfilePictureDto getProfilePicture() {
-        String username1 = "lara";
-        return userService.getProfilePicture(username1);
-    }
 
 }
