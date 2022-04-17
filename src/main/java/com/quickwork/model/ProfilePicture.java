@@ -6,10 +6,10 @@ import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "profile_pic", schema = "qw_dta")
+@Table(name = "profile_picture", schema = "qw_dta")
 @Getter
 @Setter
-public class ProfilePic {
+public class ProfilePicture {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -20,7 +20,7 @@ public class ProfilePic {
     //image bytes can have large lengths so we specify a value
     //which is more than the default length for picByte column
     @Column(length = 1000)
-    private byte[] picByte;
+    private byte[] encodedPicture;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)

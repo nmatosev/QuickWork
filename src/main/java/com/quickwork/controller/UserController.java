@@ -80,14 +80,6 @@ public class UserController {
 
     }
 
-
-/*    @ApiOperation(value = "Retrieve all messages for user on ad", produces = MediaType.APPLICATION_JSON_VALUE)
-    @GetMapping(value = "public/{adId}/{username}")
-    public List<MessageDto> getUsersMessagesOnAd(@PathVariable("username") long adId, @PathVariable("username") String username) {
-        return userService.getUsersAdMessagesOnAd(adId, username);
-    }*/
-
-
     @ApiOperation(value = "Retrieve all active ads", produces = MediaType.APPLICATION_JSON_VALUE)
     @GetMapping(value = "public/ads")
     public List<AdDto> getAds() {
@@ -141,24 +133,7 @@ public class UserController {
         return new ResponseEntity<>("pic uploaded successfully!", HttpStatus.OK);
 
     }
-/*    @ApiOperation(value = "Upload profile picture")
-    @PostMapping(value = "public/upload", headers = ("content-type=multipart/*"), consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<String> uploadProfilePic(@RequestBody ImageRequest imageRequest)
-            throws IOException {
-        logger.info("Uploading new profile picture for user " + imageRequest.getUser());
 
-        userService.setProfilePicture(imageRequest);
-        return new ResponseEntity<>("pic uploaded successfully!", HttpStatus.OK);
-    }*/
-
-/*    @ApiOperation(value = "Upload profile picture")
-    @PostMapping(value = "public/upload", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<String> uploadProfilePic(@RequestPart("user") String user, @RequestParam("imageFile") MultipartFile file)
-            throws IOException {
-        logger.info("Uploading new profile picture for user " + user);
-        userService.setProfilePicture(user, file);
-        return new ResponseEntity<>("pic uploaded successfully!", HttpStatus.OK);
-    }*/
 
     @ApiOperation(value = "Delete ad", produces = MediaType.APPLICATION_JSON_VALUE)
     @DeleteMapping(value = "public/ad/{id}")

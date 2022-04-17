@@ -10,10 +10,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -342,10 +340,10 @@ public class UserServiceImpl implements UserService {
         if (user.isPresent()) {
             byte[] byteArr = file.getBytes();
             //InputStream inputStream = new ByteArrayInputStream(byteArr);
-            ProfilePic profilePic = new ProfilePic();
+            ProfilePicture profilePic = new ProfilePicture();
             profilePic.setName(file.getOriginalFilename());
             profilePic.setUser(user.get());
-            profilePic.setPicByte(compressBytes(byteArr));
+            profilePic.setEncodedPicture(compressBytes(byteArr));
 
             profilePicDAO.save(profilePic);
         }
@@ -355,11 +353,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ProfilePictureDto getProfilePicture(String username) {
-        Optional<User> user = userDAO.findByUsername(username);
+        Optional<ProfilePicture> user = profilePicDAO.findByName(username);
         logger.info("Getting profile pic for " + username );
         if(user.isPresent()) {
-            ProfilePic profilePic = user.get().getProfilePic().get(0);
-            profilePic.setPicByte(decompressBytes(profilePic.getPicByte()));
+            ProfilePicture profilePic = user.get();
+            profilePic.setEncodedPicture(decompressBytes(profilePic.getEncodedPicture()));
             return convertToDto(profilePic);
         }
         logger.info("Profile picture for user " + username + " not found");
@@ -367,11 +365,11 @@ public class UserServiceImpl implements UserService {
         return null;
     }
 
-    private ProfilePictureDto convertToDto(ProfilePic profilePic) {
+    private ProfilePictureDto convertToDto(ProfilePicture profilePic) {
         ProfilePictureDto profilePictureDto = new ProfilePictureDto();
         StringBuilder base64 = new StringBuilder("data:image/png;base64,");
-        base64.append(Base64.getEncoder().encodeToString(profilePic.getPicByte()));
-        profilePictureDto.setPicByte(base64.toString());
+        base64.append(Base64.getEncoder().encodeToString(profilePic.getEncodedPicture()));
+        profilePictureDto.setEncodedPicture(base64.toString());
         return profilePictureDto;
     }
 
@@ -381,10 +379,10 @@ public class UserServiceImpl implements UserService {
         if (user.isPresent()) {
             byte[] byteArr = imageRequest.getUploadImageData().getBytes();
             //InputStream inputStream = new ByteArrayInputStream(byteArr);
-            ProfilePic profilePic = new ProfilePic();
+            ProfilePicture profilePic = new ProfilePicture();
             profilePic.setName(imageRequest.getUploadImageData().getOriginalFilename());
             profilePic.setUser(user.get());
-            profilePic.setPicByte(compressBytes(byteArr));
+            profilePic.setEncodedPicture(compressBytes(byteArr));
 
             profilePicDAO.save(profilePic);
         }

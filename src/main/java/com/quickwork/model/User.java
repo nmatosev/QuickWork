@@ -36,7 +36,7 @@ public class User implements UserDetails {
 
     //TODO change this to one to one
     @OneToMany(mappedBy = "user")
-    List<ProfilePic> profilePic;
+    List<ProfilePicture> profilePic;
 
     public User(String username, String email, String encodedPassword, String roleCode, String phoneNumber) {
         this.username = username;
