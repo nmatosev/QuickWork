@@ -1,6 +1,5 @@
 create schema if not exists qw_dta;
 
----tables
 create table qw_dta."user"(
                               id SERIAL,
                               username varchar(100) not null unique,
@@ -62,6 +61,15 @@ create table qw_dta.message(
                                constraint message_pk PRIMARY KEY (id)
 );
 
+create table qw_dta.profile_picture(
+                               id SERIAL,
+                               name varchar (200),
+                               "type" varchar (200),
+                               encoded_picture bytea,
+                               user_id integer,
+                               constraint profile_picture_pk PRIMARY KEY (id)
+);
+
 ALTER TABLE qw_dta.ad
     ADD CONSTRAINT user_fk FOREIGN KEY (user_id) REFERENCES qw_dta."user" (id);
 ALTER TABLE qw_dta.ad
@@ -76,6 +84,8 @@ ALTER TABLE qw_dta.message
     ADD CONSTRAINT user2_fk FOREIGN KEY (user2_id) REFERENCES qw_dta."user" (id);
 ALTER TABLE qw_dta.message
     ADD CONSTRAINT ad_fk FOREIGN KEY (ad_id) REFERENCES qw_dta.ad (id);
+ALTER TABLE qw_dta.profile_picture
+    ADD CONSTRAINT profile_picture_fk FOREIGN KEY (user_id) REFERENCES qw_dta."user" (id);
 
 
 insert into qw_dta.cfg_county("name") values ('Zagrebačka županija');
