@@ -24,6 +24,7 @@ public class Review {
     private String title;
     private String content;
     private int rating;
+    private String role;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)

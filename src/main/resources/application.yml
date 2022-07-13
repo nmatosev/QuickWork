@@ -1,15 +1,15 @@
 
 spring:
   datasource:
-    username: postgres
-    password: postgres
+    username: matnen
+    password: matnen
     url: jdbc:postgresql://localhost:5432/qw_dta_db
-  liquibase.enabled: false
-  liquibase.change-log: classpath:db/liquibase-changelog.xml
+  liquibase.enabled: true
+  liquibase.change-log: classpath:db/changelog/liquibase-changelog.xml
 
 management:
   security:
-    enabled: false
+    enabled: true
   endpoints:
     web:
       exposure:
@@ -21,3 +21,7 @@ management:
         enabled: true
     prometheus:
       enabled: true
+
+
+jwt:
+  secret: quickwork

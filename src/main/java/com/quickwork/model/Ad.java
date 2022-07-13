@@ -24,11 +24,13 @@ public class Ad {
     private long id;
     private String title;
     private String content;
-    private boolean active;
     private Date validUntil;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "county_id", nullable = false)
+    private County county;
 }
