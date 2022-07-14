@@ -18,11 +18,6 @@ public class RegistrationService {
     }
 
     public String register(RegistrationRequest request) throws IllegalStateException {
-        //TODO validator for email
-        //boolean isValid = emailValidator.test(request.getEmail());
-/*        if(!isValid){
-            throw new IllegalStateException("email not valid");
-        }*/
         if (userDAO.findByEmail(request.getEmail()).isPresent() || userDAO.findByUsername(request.getUsername()).isPresent()) {
             throw new IllegalStateException("User with that username or email already exists!");
         }
