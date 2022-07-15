@@ -31,7 +31,7 @@ public class User implements UserDetails {
     List<Ad> ads;
 
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     List<Review> reviews;
 
     //TODO change this to one to one
