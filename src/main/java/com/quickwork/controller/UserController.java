@@ -38,7 +38,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "Auth", produces = MediaType.APPLICATION_JSON_VALUE)
-    @GetMapping(value = "/authenticate")
+    @GetMapping(value = "/public/authenticate")
     public String authenticate() {
         return userService.getUsers().toString();
     }
@@ -58,14 +58,14 @@ public class UserController {
     }
 
     @ApiOperation(value = "Retrieve all users data from DB by username", produces = MediaType.APPLICATION_JSON_VALUE)
-    @GetMapping(value = "userByUsername/{username}")
+    @GetMapping(value = "user/{username}")
     public ResponseEntity<UserDto> getUserByUsername(@PathVariable("username") String username) {
         User user = userService.getUserByUsername(username);
         return new ResponseEntity<>(modelMapper.map(user, UserDto.class), HttpStatus.OK);
     }
 
     @ApiOperation(value = "Retrieve all active ads by user", produces = MediaType.APPLICATION_JSON_VALUE)
-    @GetMapping(value = "adsByUsername/{username}")
+    @GetMapping(value = "ads/{username}")
     public List<AdDto> getUsersAds(@PathVariable("username") String username) {
         List<Ad> ads = userService.getActiveAdsByUsername(username);
         return ads.stream().map(e -> modelMapper.map(e, AdDto.class)).collect(Collectors.toList());
@@ -97,7 +97,7 @@ public class UserController {
 
     //TODO disable this api for non registered users
     @ApiOperation(value = "Save review", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PostMapping(value = "public/saveReview")
+    @PostMapping(value = "public/review")
     public ResponseEntity<String> insertReview(@RequestBody ReviewDto reviewDto) {
         logger.info("Inserting new review");
         userService.insertReview(reviewDto);
@@ -107,7 +107,7 @@ public class UserController {
 
     //TODO disable this api for non registered users
     @ApiOperation(value = "Send message", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PostMapping(value = "public/sendMessage")
+    @PostMapping(value = "public/message")
     public ResponseEntity<String> sendMessage(@RequestBody MessageRequest messageRequest) {
         logger.info("Inserting new message");
         userService.insertMessage(messageRequest);
@@ -117,7 +117,7 @@ public class UserController {
 
     @CrossOrigin(origins = "http://localhost:4200")
     @ApiOperation(value = "Get profile picture", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PostMapping(value = "public/profilePicture")
+    @PostMapping(value = "public/profile-picture")
     public ProfilePictureDto getProfilePicture(@RequestBody ProfilePictureRequest profilePictureRequest) {
         return userService.getProfilePicture(profilePictureRequest.getUsername());
     }
@@ -150,5 +150,12 @@ public class UserController {
         return userService.getCounties();
     }
 
+
+    @ApiOperation(value = "Get all reviews for user", produces = MediaType.APPLICATION_JSON_VALUE)
+    @CrossOrigin(origins = "http://localhost:4200")
+    @GetMapping(value = "review/{username}")
+    public List<ReviewDto> getReviews(@PathVariable String username) {
+        return userService.getReviewsByUsername(username);
+    }
 
 }

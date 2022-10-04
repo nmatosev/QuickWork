@@ -4,6 +4,7 @@ import com.quickwork.dtos.*;
 import com.quickwork.model.*;
 import com.quickwork.repository.*;
 import com.quickwork.service.exception.NotFoundException;
+import com.quickwork.utilities.Constants;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.modelmapper.ModelMapper;
@@ -140,8 +141,8 @@ public class UserServiceImpl implements UserService {
         County county = new County();
         county.setId(adDto.getCountyId());
         ad.setCounty(county);
-        Date weekAfter = new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 7));
-        ad.setValidUntil(weekAfter);
+        Date expiryDate = new Date(new Date().getTime() + Constants.EXPIRY_DATE_OFFSET);
+        ad.setValidUntil(expiryDate);
         User user = new User();
         user.setId(adDto.getUserId());
         ad.setUser(user);
@@ -275,10 +276,20 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public List<Review> getReviewsByUsername(String username) {
+    public List<ReviewDto> getReviewsByUsername(String username) {
         Optional<User> user = userDAO.findByUsername(username);
         if (user.isPresent()) {
-            return user.get().getReviews();
+            List<ReviewDto> reviewDtos = new ArrayList<>();
+            for (Review review : user.get().getReviews()) {
+                ReviewDto reviewDto = new ReviewDto();
+                reviewDto.setReviewedUsername(review.getUser().getUsername());//TODO check this
+                reviewDto.setContent(review.getContent());
+                reviewDto.setRating(review.getRating());
+                reviewDto.setTitle(review.getTitle());
+                reviewDtos.add(reviewDto);
+            }
+
+            return reviewDtos;
         } else {
             throw new NotFoundException("User with username " + username + " not found!");
         }
@@ -289,16 +300,6 @@ public class UserServiceImpl implements UserService {
         return countyDAO.findAll();
     }
 
-
-    @Override
-    public void deleteUser(long id) {
-        Optional<User> user = userDAO.findById(id);
-        if (user.isPresent()) {
-            userDAO.deleteById(id);
-        } else {
-            throw new NotFoundException("User with ID " + id + " not found!");
-        }
-    }
 
     @Override
     public List<UserDto> getUsers() {

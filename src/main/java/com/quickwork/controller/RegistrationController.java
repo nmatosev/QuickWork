@@ -25,11 +25,6 @@ public class RegistrationController {
     @RequestMapping(value = "public/register", method = RequestMethod.POST)
     public ResponseEntity<String> register(@RequestBody RegistrationRequest request) {
         return new ResponseEntity<>(registrationService.register(request), HttpStatus.OK);
-
     }
 
-    @RequestMapping(value = "/deleteUser", method = RequestMethod.POST)
-    public String deleteUser(@RequestBody RegistrationRequest request) {
-        return registrationService.delete(request);
-    }
 }

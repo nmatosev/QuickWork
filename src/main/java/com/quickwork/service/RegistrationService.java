@@ -28,7 +28,4 @@ public class RegistrationService {
     }
 
 
-    public String delete(RegistrationRequest request) {
-        return "";
-    }
 }

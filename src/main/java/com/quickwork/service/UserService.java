@@ -4,7 +4,6 @@ import com.quickwork.dtos.*;
 import com.quickwork.model.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -17,8 +16,6 @@ public interface UserService {
 
     User getUserByUsername(String username);
 
-    void deleteUser(long id);
-
     List<UserDto> getUsers();
 
     List<Ad> getActiveAdsByUsername(String username);
@@ -29,7 +26,7 @@ public interface UserService {
 
     void deleteAd(long id);
 
-    List<Review> getReviewsByUsername(String username);
+    List<ReviewDto> getReviewsByUsername(String username);
 
     List<County> getCounties();
 
