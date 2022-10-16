@@ -1,7 +1,7 @@
 package com.quickwork;
 
 import com.quickwork.dtos.MessageRequest;
-import com.quickwork.dtos.ReviewDto;
+import com.quickwork.dtos.ReviewResponse;
 import com.quickwork.model.Ad;
 import com.quickwork.model.County;
 import com.quickwork.model.RegistrationRequest;
@@ -45,17 +45,17 @@ public class TestUtils {
     }
 
     public static Review insertReview(UserDAO userDAO) {
-        ReviewDto reviewDto = new ReviewDto(1L, "review-title", "review-content", 4, DUMMY_USER2, DUMMY_USER1);
+        ReviewResponse reviewResponse = new ReviewResponse(1L, "review-title", "review-content", 4, DUMMY_USER2, DUMMY_USER1);
         Review review = new Review();
-        Optional<User> user = userDAO.findByUsername(reviewDto.getReviewedUsername());
+        Optional<User> user = userDAO.findByUsername(reviewResponse.getReviewedUsername());
         if (user.isPresent()) {
             review.setUser(user.get());
-            review.setTitle(reviewDto.getTitle());
-            review.setContent(reviewDto.getContent());
-            review.setRating(reviewDto.getRating());
+            review.setTitle(reviewResponse.getTitle());
+            review.setContent(reviewResponse.getContent());
+            review.setRating(reviewResponse.getRating());
             review.setRole(RoleCode.USER.name());
         } else {
-            throw new NotFoundException("User with username " + reviewDto.getReviewedUsername() + " not found!");
+            throw new NotFoundException("User with username " + reviewResponse.getReviewedUsername() + " not found!");
         }
 
         return review;

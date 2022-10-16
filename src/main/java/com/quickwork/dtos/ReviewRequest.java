@@ -1,15 +1,9 @@
 package com.quickwork.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-public class ReviewDto {
+@Data
+public class ReviewRequest {
 
     private Long id;
     private String title;

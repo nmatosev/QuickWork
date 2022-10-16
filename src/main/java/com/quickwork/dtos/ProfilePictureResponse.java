@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ProfilePictureDto {
+public class ProfilePictureResponse {
 
     private long id;
     private String name;

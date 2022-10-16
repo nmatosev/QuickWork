@@ -1,6 +1,5 @@
 package com.quickwork.controller;
 
-import com.quickwork.dtos.UserDto;
 import com.quickwork.model.RegistrationRequest;
 import com.quickwork.service.RegistrationService;
 import org.springframework.http.HttpStatus;

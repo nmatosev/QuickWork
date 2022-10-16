@@ -2,7 +2,7 @@ package com.quickwork.controller;
 
 import com.quickwork.auth.JwtRequest;
 import com.quickwork.auth.JwtTokenUtil;
-import com.quickwork.dtos.UserDto;
+import com.quickwork.dtos.UserResponse;
 import com.quickwork.model.User;
 import com.quickwork.service.JwtUserDetailsService;
 import com.quickwork.service.UserService;
@@ -50,13 +50,13 @@ public class JwtAuthController {
 
         final String token = jwtTokenUtil.generateToken(userDetails);
         User user = userService.getUserByUsername(authenticationRequest.getUsername());
-        UserDto userDto = new UserDto();
-        userDto.setId(user.getId());
-        userDto.setUsername(user.getUsername());
-        userDto.getRoles().add(user.getRole());
-        userDto.setEmail(user.getEmail());
-        userDto.setToken(token);
-        return ResponseEntity.ok(userDto);
+        UserResponse userResponse = new UserResponse();
+        userResponse.setId(user.getId());
+        userResponse.setUsername(user.getUsername());
+        userResponse.getRoles().add(user.getRole());
+        userResponse.setEmail(user.getEmail());
+        userResponse.setToken(token);
+        return ResponseEntity.ok(userResponse);
     }
 
     private void authenticate(String username, String password) throws Exception {

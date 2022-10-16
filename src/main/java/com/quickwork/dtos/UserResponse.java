@@ -8,16 +8,14 @@ import java.util.List;
 
 @Getter
 @Setter
-public class UserDto {
+public class UserResponse {
     private long id;
     private String username;
-    private List<AdDto> ads;
-    private List<ReviewDto> reviews;
+    private List<AdResponse> ads;
+    private List<ReviewResponse> reviews;
     private String rating;
     private String token;
     private List<String> roles = new ArrayList<>();
     private String email;
     private String phoneNumber;
-
-
 }

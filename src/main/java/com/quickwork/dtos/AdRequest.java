@@ -1,12 +1,9 @@
 package com.quickwork.dtos;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-@Getter
-@Setter
-public class AdDto {
-
+@Data
+public class AdRequest {
     private long id;
     private String title;
     private String content;
@@ -14,6 +11,5 @@ public class AdDto {
     private long userId;
     private String validUntil;
     private String county;
-    private UserDto user;
-
+    private UserResponse user;
 }

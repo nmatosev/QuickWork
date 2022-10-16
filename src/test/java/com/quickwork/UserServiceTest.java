@@ -1,10 +1,10 @@
 package com.quickwork;
 
-import com.quickwork.dtos.AdChat;
-import com.quickwork.dtos.AdDto;
+import com.quickwork.dtos.AdChatResponse;
+import com.quickwork.dtos.AdResponse;
 import com.quickwork.dtos.MessageRequest;
-import com.quickwork.dtos.ReviewDto;
-import com.quickwork.dtos.UserDto;
+import com.quickwork.dtos.ReviewResponse;
+import com.quickwork.dtos.UserResponse;
 import com.quickwork.model.Ad;
 import com.quickwork.model.RegistrationRequest;
 import com.quickwork.model.Review;
@@ -77,44 +77,44 @@ public class UserServiceTest extends AbstractTest {
     @Test
     public void adUsersMessagesTest() {
 
-        Map<Long, AdChat> messages = userService.getUsersAdMessages(DUMMY_USER2);
+        Map<Long, AdChatResponse> messages = userService.getUsersAdMessages(DUMMY_USER2);
         Assertions.assertFalse(messages.isEmpty());
         Assertions.assertEquals(1, messages.size());
-        AdChat adChat = messages.values().stream().findFirst().get();
-        Assertions.assertEquals(1, adChat.getMessages().size());
-        Assertions.assertEquals("test ad", adChat.getContent());
-        Assertions.assertEquals("user1", adChat.getMessages().get(0).getUser1());
-        Assertions.assertEquals("msg-content-test", adChat.getMessages().get(0).getMessageContent());
+        AdChatResponse adChatResponse = messages.values().stream().findFirst().get();
+        Assertions.assertEquals(1, adChatResponse.getMessages().size());
+        Assertions.assertEquals("test ad", adChatResponse.getContent());
+        Assertions.assertEquals("user1", adChatResponse.getMessages().get(0).getUser1());
+        Assertions.assertEquals("msg-content-test", adChatResponse.getMessages().get(0).getMessageContent());
 
     }
 
     @Test
     public void activeAdsTest() {
-        List<AdDto> adDtos = userService.getActiveAds();
+        List<AdResponse> adDtos = userService.getActiveAds();
         Assertions.assertFalse(adDtos.isEmpty());
         Assertions.assertEquals(1, adDtos.size());
-        AdDto testAd = adDtos.get(0);
-        UserDto userDto = testAd.getUser();
+        AdResponse testAd = adDtos.get(0);
+        UserResponse userResponse = testAd.getUser();
         Assertions.assertEquals("test ad", testAd.getContent());
         Assertions.assertEquals("test ad title", testAd.getTitle());
         Assertions.assertEquals("user1", testAd.getUser().getUsername());
         Assertions.assertEquals("user1@gmail.com", testAd.getUser().getEmail());
-        Assertions.assertEquals("4,00", userDto.getRating());
+        Assertions.assertEquals("4,00", userResponse.getRating());
     }
 
     @Test
     public void insertReviewTest() {
-        List<ReviewDto> reviews = userService.getReviewsByUsername(DUMMY_USER1);
+        List<ReviewResponse> reviews = userService.getReviewsByUsername(DUMMY_USER1);
         Assertions.assertFalse(reviews.isEmpty());
-        ReviewDto reviewDto = reviews.stream().findFirst().get();
-        Assertions.assertEquals("review-title", reviewDto.getTitle());
-        Assertions.assertEquals("review-content", reviewDto.getContent());
-        Assertions.assertEquals(4, reviewDto.getRating());
+        ReviewResponse reviewResponse = reviews.stream().findFirst().get();
+        Assertions.assertEquals("review-title", reviewResponse.getTitle());
+        Assertions.assertEquals("review-content", reviewResponse.getContent());
+        Assertions.assertEquals(4, reviewResponse.getRating());
     }
 
     @Test
     public void getUsersTest() {
-        List<UserDto> users = userService.getUsers();
+        List<UserResponse> users = userService.getUsers();
         Assertions.assertFalse(users.isEmpty());
         Assertions.assertEquals(2, users.size());
     }

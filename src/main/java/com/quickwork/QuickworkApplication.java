@@ -8,8 +8,6 @@ public class QuickworkApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(QuickworkApplication.class, args);
-
-
     }
 
 }

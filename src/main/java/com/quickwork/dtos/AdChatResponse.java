@@ -8,10 +8,10 @@ import java.util.List;
 
 @Getter
 @Setter
-public class AdChat {
+public class AdChatResponse {
 
     private long adId;
     private String title;
     private String content;
-    List<MessageDto> messages = new ArrayList<>();
+    List<MessageResponse> messages = new ArrayList<>();
 }

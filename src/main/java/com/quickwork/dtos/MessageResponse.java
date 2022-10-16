@@ -5,7 +5,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class MessageDto {
+public class MessageResponse {
 
     String messageContent;
     String user1;

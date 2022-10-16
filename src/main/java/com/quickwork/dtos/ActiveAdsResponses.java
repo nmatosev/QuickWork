@@ -7,8 +7,8 @@ import java.util.List;
 
 @Getter
 @Setter
-public class ActiveAdsDto {
+public class ActiveAdsResponses {
 
-    private List<AdDto> ads;
+    private List<AdResponse> ads;
 
 }
