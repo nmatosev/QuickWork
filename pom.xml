@@ -99,9 +99,6 @@
 			<artifactId>postgresql</artifactId>
 			<version>1.17.3</version>
 		</dependency>
-
-
-
 	</dependencies>
 
 	<build>

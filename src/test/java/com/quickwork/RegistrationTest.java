@@ -25,7 +25,6 @@ public class RegistrationTest extends AbstractTest {
     private UserDAO userDAO;
 
 
-
     @Test
     public void registerUser() {
         RegistrationRequest request = TestUtils.prepareRegistrationRequest();
@@ -38,7 +37,6 @@ public class RegistrationTest extends AbstractTest {
         RegistrationRequest request = TestUtils.prepareRegistrationRequest();
         registrationService.register(request);
         IllegalStateException exception = Assertions.assertThrows(IllegalStateException.class, () -> registrationService.register(request));
-
         Assertions.assertEquals("User with that username or email already exists!", exception.getMessage());
     }
 

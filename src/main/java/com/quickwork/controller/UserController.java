@@ -80,7 +80,7 @@ public class UserController {
     }
 
     @ApiOperation(value = "Retrieve all active ads", produces = MediaType.APPLICATION_JSON_VALUE)
-    @GetMapping(value = "public/ads")
+    @GetMapping(value = "public/ads", produces = MediaType.APPLICATION_JSON_VALUE)
     public List<AdResponse> getAds() {
         return userService.getActiveAds();
     }
@@ -95,7 +95,7 @@ public class UserController {
 
     //TODO disable this api for non registered users
     @ApiOperation(value = "Save review", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PostMapping(value = "public/review")
+    @PostMapping(value = "/public/review")
     public ResponseEntity<String> insertReview(@RequestBody ReviewRequest reviewRequest) {
         logger.info("Inserting new review");
         userService.insertReview(reviewRequest);
@@ -104,7 +104,7 @@ public class UserController {
 
     //TODO disable this api for non registered users
     @ApiOperation(value = "Send message", produces = MediaType.APPLICATION_JSON_VALUE)
-    @PostMapping(value = "public/message")
+    @RequestMapping(value = "/public/message", produces = MediaType.APPLICATION_JSON_VALUE, method = RequestMethod.POST)
     public ResponseEntity<String> sendMessage(@RequestBody MessageRequest messageRequest) {
         logger.info("Inserting new message");
         userService.insertMessage(messageRequest);

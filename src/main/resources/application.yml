@@ -1,8 +1,8 @@
 
 spring:
   datasource:
-    username: matnen
-    password: matnen
+    username: postgres
+    password: postgres
     url: jdbc:postgresql://localhost:5432/qw_dta_db
   liquibase.enabled: true
   liquibase.change-log: classpath:db/changelog/liquibase-changelog.xml

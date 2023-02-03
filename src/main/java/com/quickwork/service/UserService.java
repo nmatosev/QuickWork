@@ -1,9 +1,16 @@
 package com.quickwork.service;
 
-import com.quickwork.dtos.*;
-import com.quickwork.model.*;
+import com.quickwork.dtos.AdChatResponse;
+import com.quickwork.dtos.AdRequest;
 import com.quickwork.dtos.AdResponse;
+import com.quickwork.dtos.MessageRequest;
 import com.quickwork.dtos.ProfilePictureResponse;
+import com.quickwork.dtos.ReviewRequest;
+import com.quickwork.dtos.ReviewResponse;
+import com.quickwork.dtos.UserResponse;
+import com.quickwork.model.Ad;
+import com.quickwork.model.County;
+import com.quickwork.model.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -38,7 +45,5 @@ public interface UserService {
 
     void setProfilePicture(String username, MultipartFile file) throws IOException;
 
-    void setProfilePicture(ImageRequest imageRequest) throws IOException;
-
-   ProfilePictureResponse getProfilePicture(String username);
+    ProfilePictureResponse getProfilePicture(String username);
 }

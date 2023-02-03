@@ -6,10 +6,12 @@ import com.quickwork.dtos.MessageRequest;
 import com.quickwork.dtos.ReviewResponse;
 import com.quickwork.dtos.UserResponse;
 import com.quickwork.model.Ad;
+import com.quickwork.model.County;
 import com.quickwork.model.RegistrationRequest;
 import com.quickwork.model.Review;
 import com.quickwork.model.User;
 import com.quickwork.repository.AdDAO;
+import com.quickwork.repository.CountyDAO;
 import com.quickwork.repository.MessageDAO;
 import com.quickwork.repository.ReviewDAO;
 import com.quickwork.repository.UserDAO;
@@ -22,8 +24,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
@@ -32,8 +34,11 @@ import java.util.Map;
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
 @Testcontainers
-@DirtiesContext
 public class UserServiceTest extends AbstractTest {
+
+    @Autowired
+    protected WebApplicationContext context;
+
     @Autowired
     private UserService userService;
 
@@ -52,26 +57,37 @@ public class UserServiceTest extends AbstractTest {
     @Autowired
     private ReviewDAO reviewDAO;
 
+    @Autowired
+    private CountyDAO countyDAO;
+
     public static final String DUMMY_USER1 = "user1";
     public static final String DUMMY_USER2 = "user2";
 
     @BeforeEach
     public void prepareScenarios() {
-        RegistrationRequest sender = new RegistrationRequest(DUMMY_USER1, "pass", "user1@gmail.com", "user", "098555555");
-        RegistrationRequest receiver = new RegistrationRequest(DUMMY_USER2, "pass", "user2@gmail.com", "user", "098555556");
-        registrationService.register(sender);
-        registrationService.register(receiver);
+        messageDAO.deleteAll();
+        reviewDAO.deleteAll();
+        adDAO.deleteAll();
+        userDAO.deleteAll();
+        countyDAO.deleteAll();
 
-        User user = userService.getUserByUsername(DUMMY_USER1);
+        County county = new County(1L, "1", "Zagrebacka");
+        countyDAO.save(county);
+        List<County> countyList = countyDAO.findAll();
 
-        Ad ad = TestUtils.createAd(user);
-
+        User user = TestUtils.createUser(TestUtils.DUMMY_USER1);
+        User user2 = TestUtils.createUser(TestUtils.DUMMY_USER2);
+        userDAO.save(user);
+        userDAO.save(user2);
+        Ad ad = TestUtils.createAd(user, countyList.get(0));
         adDAO.save(ad);
-        MessageRequest messageRequest = TestUtils.createMessage(ad);
-        userService.insertMessage(messageRequest);
 
         Review review = TestUtils.insertReview(userDAO);
         reviewDAO.save(review);
+
+        MessageRequest messageRequest = TestUtils.createMessage(ad);
+        userService.insertMessage(messageRequest);
+
     }
 
     @Test
@@ -96,7 +112,7 @@ public class UserServiceTest extends AbstractTest {
         AdResponse testAd = adDtos.get(0);
         UserResponse userResponse = testAd.getUser();
         Assertions.assertEquals("test ad", testAd.getContent());
-        Assertions.assertEquals("test ad title", testAd.getTitle());
+        Assertions.assertEquals("adtest", testAd.getTitle());
         Assertions.assertEquals("user1", testAd.getUser().getUsername());
         Assertions.assertEquals("user1@gmail.com", testAd.getUser().getEmail());
         Assertions.assertEquals("4,00", userResponse.getRating());
@@ -112,6 +128,12 @@ public class UserServiceTest extends AbstractTest {
         Assertions.assertEquals(4, reviewResponse.getRating());
     }
 
+/*    @Test
+    public void testSetProfilePictureTest () {
+        MultipartFile multipartFile = new MockMultipartFile();
+        userService.setProfilePicture();
+    }*/
+
     @Test
     public void getUsersTest() {
         List<UserResponse> users = userService.getUsers();
@@ -121,10 +143,7 @@ public class UserServiceTest extends AbstractTest {
 
     @AfterEach
     public void cleanup() {
-        reviewDAO.deleteAll();
-        messageDAO.deleteAll();
-        adDAO.deleteAll();
-        userDAO.deleteAll();
+
     }
 
 

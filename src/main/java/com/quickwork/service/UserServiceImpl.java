@@ -189,15 +189,20 @@ public class UserServiceImpl implements UserService {
         Optional<User> user1 = userDAO.findByUsername(messageRequest.getSender());
         Optional<Ad> ad = adDAO.findById(messageRequest.getAdId());
         //if chat is initiated
-        if (user1.isPresent() && ad.isPresent()) {
-            message.setMessage(messageRequest.getMessageContent());
-            message.setUser1(user1.get());
-            message.setUser2(ad.get().getUser());
-            message.setAd(ad.get());
-        } else {
-            logger.warn("User with username " + messageRequest.getSender() + " or ad with " + messageRequest.getAdId() + " id not found!");
-            throw new NotFoundException("User with username " + messageRequest.getSender() + "or ad with " + messageRequest.getAdId() + " not found!");
+        if (user1.isEmpty()) {
+            logger.warn("User with username " + messageRequest.getSender() + " id not found!");
+            throw new NotFoundException("User with username " + messageRequest.getSender() + " not found!");
         }
+        if (ad.isEmpty()) {
+            logger.warn("Ad with " + messageRequest.getAdId() + " id not found!");
+            throw new NotFoundException("Ad with " + messageRequest.getAdId() + " not found!");
+        }
+
+        message.setMessage(messageRequest.getMessageContent());
+        message.setUser1(user1.get());
+        message.setUser2(ad.get().getUser());
+        message.setAd(ad.get());
+
     }
 
     private void mapRequestToMessageChat(Message message, MessageRequest messageRequest) {
@@ -207,21 +212,27 @@ public class UserServiceImpl implements UserService {
         Optional<User> user2 = userDAO.findByUsername(messageRequest.getReceiver());
         Optional<Ad> ad = adDAO.findById(messageRequest.getAdId());
 
-        if (user1.isPresent() && user2.isPresent() && ad.isPresent()) {
+        if (user1.isEmpty()) {
+            logger.warn("User with username " + messageRequest.getSender() + " or ad with " + messageRequest.getAdId() + " id not found!");
+            throw new RuntimeException("User " +  messageRequest.getSender() + " not found!");
+        }
+        if (ad.isEmpty()) {
+            logger.warn("Ad with " + messageRequest.getAdId() + " id not found!");
+            throw new RuntimeException("Ad " +  messageRequest.getAdId() + " not found!");
+        }
+
+        if (user2.isPresent()) {
             //if ad owner sends message
             message.setMessage(messageRequest.getMessageContent());
             message.setUser1(user1.get());
             message.setUser2(user2.get());
             message.setAd(ad.get());
-        } else if (user1.isPresent() && user2.isEmpty() && ad.isPresent()) {
+        } else {
             //if chat initator sends message
             message.setMessage(messageRequest.getMessageContent());
             message.setUser1(user1.get());
             message.setUser2(ad.get().getUser());
             message.setAd(ad.get());
-        } else {
-            logger.warn("User with username " + messageRequest.getSender() + " or ad with " + messageRequest.getAdId() + " id not found!");
-            throw new NotFoundException("User with username " + messageRequest.getSender() + "or ad with " + messageRequest.getAdId() + " not found!");
         }
     }
 
@@ -370,19 +381,6 @@ public class UserServiceImpl implements UserService {
         base64.append(Base64.getEncoder().encodeToString(profilePic.getEncodedPicture()));
         profilePictureResponse.setEncodedPicture(base64.toString());
         return profilePictureResponse;
-    }
-
-    @Override
-    public void setProfilePicture(ImageRequest imageRequest) throws IOException {
-        Optional<User> user = userDAO.findByUsername(imageRequest.getUser());
-        if (user.isPresent()) {
-            byte[] byteArr = imageRequest.getUploadImageData().getBytes();
-            ProfilePicture profilePic = new ProfilePicture();
-            profilePic.setName(imageRequest.getUploadImageData().getOriginalFilename());
-            profilePic.setUser(user.get());
-            profilePic.setEncodedPicture(compressBytes(byteArr));
-            profilePicDAO.save(profilePic);
-        }
     }
 
     // compress the image bytes before storing it in the database

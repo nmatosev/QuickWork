@@ -23,26 +23,32 @@ public class TestUtils {
         return new RegistrationRequest("test", "pass", "user@gmail.com", "user", "098555555");
     }
 
-    public static Ad createAd(User user) {
+    public static Ad createAd(User user, County county) {
         Ad ad = new Ad();
         ad.setUser(user);
-        ad.setId(0);
-        ad.setCounty(new County(1, "Z", "Zagrebacka"));
+        //ad.setId(1);
+        ad.setCounty(county);
         Date weekAfter = new Date(new Date().getTime() + (1000 * 60 * 60 * 24 * 7));
         ad.setValidUntil(weekAfter);
         ad.setContent("test ad");
-        ad.setTitle("test ad title");
+        ad.setTitle("adtest");
         return ad;
     }
 
     public static MessageRequest createMessage(Ad ad) {
-        MessageRequest messageRequest = new MessageRequest();
-        messageRequest.setMessageContent("msg-content-test");
-        messageRequest.setSender(DUMMY_USER1);
-        messageRequest.setReceiver(DUMMY_USER2);
-        messageRequest.setAdId(ad.getId());
-        return messageRequest;
+        return new MessageRequest("msg-content-test", DUMMY_USER1, DUMMY_USER2, ad.getId());
     }
+
+    public static User createUser(String username) {
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(username + "@gmail.com");
+        user.setPassword("xxxx");
+        user.setRole("1");
+        user.setPhoneNumber("098664646");
+        return user;
+    }
+
 
     public static Review insertReview(UserDAO userDAO) {
         ReviewResponse reviewResponse = new ReviewResponse(1L, "review-title", "review-content", 4, DUMMY_USER2, DUMMY_USER1);
