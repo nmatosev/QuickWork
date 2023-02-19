@@ -50,12 +50,8 @@ public class JwtAuthController {
 
         final String token = jwtTokenUtil.generateToken(userDetails);
         User user = userService.getUserByUsername(authenticationRequest.getUsername());
-        UserResponse userResponse = new UserResponse();
-        userResponse.setId(user.getId());
-        userResponse.setUsername(user.getUsername());
-        userResponse.getRoles().add(user.getRole());
-        userResponse.setEmail(user.getEmail());
-        userResponse.setToken(token);
+
+        UserResponse userResponse = UserResponse.builder().id(user.getId()).username(user.getUsername()).email(user.getEmail()).token(token).build();
         return ResponseEntity.ok(userResponse);
     }
 

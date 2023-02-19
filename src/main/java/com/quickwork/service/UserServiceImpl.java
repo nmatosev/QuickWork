@@ -1,11 +1,27 @@
 package com.quickwork.service;
 
-import com.quickwork.dtos.*;
-import com.quickwork.model.*;
-import com.quickwork.repository.*;
+import com.quickwork.dtos.AdChatResponse;
+import com.quickwork.dtos.AdRequest;
 import com.quickwork.dtos.AdResponse;
+import com.quickwork.dtos.MessageRequest;
 import com.quickwork.dtos.MessageResponse;
 import com.quickwork.dtos.ProfilePictureResponse;
+import com.quickwork.dtos.ReviewRequest;
+import com.quickwork.dtos.ReviewResponse;
+import com.quickwork.dtos.UserResponse;
+import com.quickwork.model.Ad;
+import com.quickwork.model.County;
+import com.quickwork.model.Message;
+import com.quickwork.model.ProfilePicture;
+import com.quickwork.model.Review;
+import com.quickwork.model.RoleCode;
+import com.quickwork.model.User;
+import com.quickwork.repository.AdDAO;
+import com.quickwork.repository.CountyDAO;
+import com.quickwork.repository.MessageDAO;
+import com.quickwork.repository.ProfilePicDAO;
+import com.quickwork.repository.ReviewDAO;
+import com.quickwork.repository.UserDAO;
 import com.quickwork.service.exception.NotFoundException;
 import com.quickwork.utilities.Constants;
 import org.apache.commons.logging.Log;
@@ -17,7 +33,13 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
@@ -101,30 +123,22 @@ public class UserServiceImpl implements UserService {
 
 
     private AdResponse mapToAddResponses(Ad ad) {
-        AdResponse adDto = new AdResponse();
-        String validUntil = DATE_FORMAT.format(ad.getValidUntil());
-        adDto.setId(ad.getId());
-        adDto.setContent(ad.getContent());
-        adDto.setTitle(ad.getTitle());
-        adDto.setValidUntil(validUntil);
-        adDto.setCounty(ad.getCounty().getName());
-        adDto.setUser(getUserData(ad.getUser()));
-        return adDto;
+        return AdResponse.builder()
+                .validUntil(DATE_FORMAT.format(ad.getValidUntil()))
+                .id(ad.getId()).content(ad.getContent()).title(ad.getTitle())
+                .county(ad.getCounty().getName()).user(getUserData(ad.getUser())).build();
     }
 
     private UserResponse getUserData(User user) {
-        UserResponse userResponse = new UserResponse();
-        userResponse.setUsername(user.getUsername());
-        userResponse.setEmail(user.getEmail());
-        userResponse.setPhoneNumber(user.getPhoneNumber());
-        userResponse.setRating(calculateAverage(user));
-        return userResponse;
+        return UserResponse.builder().username(user.getUsername()).email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber()).rating(calculateAverage(user)).build();
     }
 
     @Override
     public void insertAd(AdRequest adRequest) {
-        Ad ad = new Ad();
-        mapDtoToAd(ad, adRequest);
+        Date expiryDate = new Date(new Date().getTime() + Constants.EXPIRY_DATE_OFFSET);
+        County county = new County(adRequest.getCountyId());
+        Ad ad = new Ad(adRequest.getTitle(), adRequest.getContent(), expiryDate, new User(adRequest.getUserId()), county);
         adDAO.save(ad);
     }
 
@@ -138,18 +152,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void mapDtoToAd(Ad ad, AdRequest adRequest) {
-        ad.setTitle(adRequest.getTitle());
-        ad.setContent(adRequest.getContent());
-        County county = new County();
-        county.setId(adRequest.getCountyId());
-        ad.setCounty(county);
-        Date expiryDate = new Date(new Date().getTime() + Constants.EXPIRY_DATE_OFFSET);
-        ad.setValidUntil(expiryDate);
-        User user = new User();
-        user.setId(adRequest.getUserId());
-        ad.setUser(user);
-    }
 
     @Override
     public void insertReview(ReviewRequest reviewRequest) {
@@ -214,11 +216,11 @@ public class UserServiceImpl implements UserService {
 
         if (user1.isEmpty()) {
             logger.warn("User with username " + messageRequest.getSender() + " or ad with " + messageRequest.getAdId() + " id not found!");
-            throw new RuntimeException("User " +  messageRequest.getSender() + " not found!");
+            throw new RuntimeException("User " + messageRequest.getSender() + " not found!");
         }
         if (ad.isEmpty()) {
             logger.warn("Ad with " + messageRequest.getAdId() + " id not found!");
-            throw new RuntimeException("Ad " +  messageRequest.getAdId() + " not found!");
+            throw new RuntimeException("Ad " + messageRequest.getAdId() + " not found!");
         }
 
         if (user2.isPresent()) {
@@ -246,10 +248,10 @@ public class UserServiceImpl implements UserService {
             for (Message message : messages) {
                 //find by receiver/the one who created the ad
                 if (message.getUser1().getUsername().equals(username) || message.getUser2().getUsername().equals(username)) {
-                    AdChatResponse adChatResponse = new AdChatResponse();
-                    adChatResponse.setAdId(message.getAd().getId());
-                    adChatResponse.setTitle(message.getAd().getTitle());
-                    adChatResponse.setContent(message.getAd().getContent());
+                    AdChatResponse adChatResponse = AdChatResponse.builder()
+                            .adId(message.getAd().getId())
+                            .title(message.getAd().getTitle())
+                            .content(message.getAd().getContent()).build();
                     adChats.put(message.getAd().getId(), adChatResponse);
                 }
             }
@@ -271,14 +273,10 @@ public class UserServiceImpl implements UserService {
         if (user.isPresent()) {
             //return messages if receiver is found
             for (Message message : messages) {
-                MessageResponse messageResponse = new MessageResponse();
-                messageResponse.setMessageContent(message.getMessage());
-                messageResponse.setUser1(message.getUser1().getUsername());
-                messageResponse.setUser2(message.getUser2().getUsername());
-                messageResponse.setAdId(message.getAd().getId());
                 String weekDay = DATE_FORMAT_WEEK_DAY.format(message.getCreatedDate());
-                messageResponse.setWeekDay(weekDay);
-                //messageDto.setAdDto(adDto);
+                MessageResponse messageResponse = MessageResponse.builder().messageContent(message.getMessage())
+                        .user1(message.getUser1().getUsername()).user2(message.getUser2().getUsername())
+                        .adId(message.getAd().getId()).weekDay(weekDay).build();
                 messageResponses.add(messageResponse);
             }
         } else {
@@ -293,14 +291,11 @@ public class UserServiceImpl implements UserService {
         if (user.isPresent()) {
             List<ReviewResponse> reviewResponses = new ArrayList<>();
             for (Review review : user.get().getReviews()) {
-                ReviewResponse reviewResponse = new ReviewResponse();
-                reviewResponse.setReviewedUsername(review.getUser().getUsername());//TODO check this
-                reviewResponse.setContent(review.getContent());
-                reviewResponse.setRating(review.getRating());
-                reviewResponse.setTitle(review.getTitle());
+                ReviewResponse reviewResponse = ReviewResponse.builder()
+                        .reviewedUsername(review.getUser().getUsername())//TODO check this
+                        .content(review.getContent()).rating(review.getRating()).title(review.getTitle()).build();
                 reviewResponses.add(reviewResponse);
             }
-
             return reviewResponses;
         } else {
             throw new NotFoundException("User with username " + username + " not found!");
@@ -318,19 +313,17 @@ public class UserServiceImpl implements UserService {
         List<User> users = userDAO.findAll();
         List<UserResponse> userResponses = new ArrayList<>();
         for (User user : users) {
-            UserResponse userResponse = new UserResponse();
-            mapToDto(user, userResponse);
-
+            UserResponse userResponse = mapToDto(user);
             userResponses.add(userResponse);
         }
         return userResponses;
     }
 
-    private void mapToDto(User user, UserResponse userResponse) {
-        userResponse.setUsername(user.getUsername());
-        userResponse.setRating(calculateAverage(user));
-        userResponse.setEmail(user.getEmail());
-        userResponse.setPhoneNumber(user.getPhoneNumber());
+    private UserResponse mapToDto(User user) {
+        return UserResponse.builder().username(user.getUsername())
+                .rating(calculateAverage(user))
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber()).build();
     }
 
     private String calculateAverage(User user) {
@@ -364,8 +357,8 @@ public class UserServiceImpl implements UserService {
     @Override
     public ProfilePictureResponse getProfilePicture(String username) {
         Optional<ProfilePicture> user = profilePicDAO.findByName(username);
-        logger.info("Getting profile pic for " + username );
-        if(user.isPresent()) {
+        logger.info("Getting profile pic for " + username);
+        if (user.isPresent()) {
             ProfilePicture profilePic = user.get();
             profilePic.setEncodedPicture(decompressBytes(profilePic.getEncodedPicture()));
             return mapToResponse(profilePic);
