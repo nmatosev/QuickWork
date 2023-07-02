@@ -25,4 +25,7 @@ public class County {
     private String code;
     private String name;
 
+    public County(long id) {
+        this.id = id;
+    }
 }

@@ -1,6 +1,7 @@
 package com.quickwork.model;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Entity;
@@ -17,6 +18,7 @@ import java.util.Date;
 @Table(name = "ad", schema = "qw_dta")
 @Getter
 @Setter
+@NoArgsConstructor
 public class Ad {
 
     @Id
@@ -33,4 +35,12 @@ public class Ad {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "county_id", nullable = false)
     private County county;
+
+    public Ad(String title, String content, Date validUntil, User user, County county) {
+        this.title = title;
+        this.content = content;
+        this.validUntil = validUntil;
+        this.user = user;
+        this.county = county;
+    }
 }

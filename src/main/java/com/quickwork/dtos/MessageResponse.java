@@ -13,5 +13,5 @@ public class MessageResponse {
     String user1;
     String user2;
     String weekDay;
-    long adId;
+    Long adId;
 }

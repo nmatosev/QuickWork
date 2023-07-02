@@ -33,13 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Base64;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
@@ -175,6 +169,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void insertMessage(MessageRequest messageDto) {
+        if (messageDto.getMessageContent() == null || messageDto.getMessageContent().isEmpty()) {
+            throw new RuntimeException("Message is null or empty!");
+        }
+
         Message message = new Message();
         if (messageDto.getReceiver() == null) {
             mapRequestToMessageModal(message, messageDto);
@@ -241,34 +239,39 @@ public class UserServiceImpl implements UserService {
 
     public Map<Long, AdChatResponse> getUsersAdMessages(String username) {
         Map<Long, AdChatResponse> adChats = new HashMap<>();
-        List<Message> messages = messageDAO.findAll();
-        List<MessageResponse> messageDtos = new ArrayList<>();
         Optional<User> user = userDAO.findByUsername(username);
-        if (user.isPresent()) {
-            for (Message message : messages) {
-                //find by receiver/the one who created the ad
-                if (message.getUser1().getUsername().equals(username) || message.getUser2().getUsername().equals(username)) {
-                    AdChatResponse adChatResponse = AdChatResponse.builder()
-                            .adId(message.getAd().getId())
-                            .title(message.getAd().getTitle())
-                            .content(message.getAd().getContent()).build();
-                    adChats.put(message.getAd().getId(), adChatResponse);
-                }
-            }
-            mapMessageToDto(messageDtos, messages, username);
-            for (MessageResponse messageDto : messageDtos) {
-                if (adChats.containsKey(messageDto.getAdId())) {
-                    //all messages for this ad
-                    AdChatResponse adChatResponse = adChats.get(messageDto.getAdId());
-                    adChatResponse.getMessages().add(messageDto);
-                }
+        if (user.isEmpty()) {
+            logger.warn("User with username " + username + " not found.");
+            throw new NotFoundException("User with username " + username + " not found.");
+        }
+
+        Set<Message> messages = new TreeSet<>(messageDAO.findByUser1Id(user.get().getId()));
+        messages.addAll(messageDAO.findByUser2Id(user.get().getId()));
+        List<MessageResponse> messageResponses = new ArrayList<>();
+
+        for (Message message : messages) {
+            //find by receiver/the one who created the ad
+            AdChatResponse adChatResponse = AdChatResponse.builder()
+                    .adId(message.getAd().getId())
+                    .title(message.getAd().getTitle())
+                    .content(message.getAd().getContent()).messages(new ArrayList<>()).build();
+
+            adChats.put(message.getAd().getId(), adChatResponse);
+
+        }
+        mapMessageToDto(messageResponses, messages, username);
+        for (MessageResponse messageDto : messageResponses) {
+            if (adChats.containsKey(messageDto.getAdId())) {
+                //all messages related to this ad
+                AdChatResponse adChatResponse = adChats.get(messageDto.getAdId());
+                adChatResponse.getMessages().add(messageDto);
             }
         }
         return adChats;
     }
 
 
-    private void mapMessageToDto(List<MessageResponse> messageResponses, List<Message> messages, String username) {
+    private void mapMessageToDto(List<MessageResponse> messageResponses, Set<Message> messages, String username) {
         Optional<User> user = userDAO.findByUsername(username);
         if (user.isPresent()) {
             //return messages if receiver is found
@@ -357,7 +360,6 @@ public class UserServiceImpl implements UserService {
     @Override
     public ProfilePictureResponse getProfilePicture(String username) {
         Optional<ProfilePicture> user = profilePicDAO.findByName(username);
-        logger.info("Getting profile pic for " + username);
         if (user.isPresent()) {
             ProfilePicture profilePic = user.get();
             profilePic.setEncodedPicture(decompressBytes(profilePic.getEncodedPicture()));

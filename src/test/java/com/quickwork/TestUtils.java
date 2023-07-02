@@ -39,6 +39,10 @@ public class TestUtils {
         return new MessageRequest("msg-content-test", DUMMY_USER1, DUMMY_USER2, ad.getId());
     }
 
+    public static MessageRequest createMessageWithoutReceiver(Ad ad) {
+        return new MessageRequest("msg-content-test", DUMMY_USER1, null, ad.getId());
+    }
+
     public static User createUser(String username) {
         User user = new User();
         user.setUsername(username);

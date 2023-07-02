@@ -27,6 +27,10 @@ public class User implements UserDetails {
     private String role;
     private String phoneNumber;
 
+    public User(Long id) {
+        this.id = id;
+    }
+
     @OneToMany(mappedBy = "user")
     List<Ad> ads;
 

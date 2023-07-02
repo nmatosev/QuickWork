@@ -1,13 +1,13 @@
 package com.quickwork;
 
 import com.quickwork.dtos.AdChatResponse;
+import com.quickwork.dtos.AdRequest;
 import com.quickwork.dtos.AdResponse;
 import com.quickwork.dtos.MessageRequest;
 import com.quickwork.dtos.ReviewResponse;
 import com.quickwork.dtos.UserResponse;
 import com.quickwork.model.Ad;
 import com.quickwork.model.County;
-import com.quickwork.model.RegistrationRequest;
 import com.quickwork.model.Review;
 import com.quickwork.model.User;
 import com.quickwork.repository.AdDAO;
@@ -17,7 +17,6 @@ import com.quickwork.repository.ReviewDAO;
 import com.quickwork.repository.UserDAO;
 import com.quickwork.service.RegistrationService;
 import com.quickwork.service.UserService;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -88,6 +87,7 @@ public class UserServiceTest extends AbstractTest {
         MessageRequest messageRequest = TestUtils.createMessage(ad);
         userService.insertMessage(messageRequest);
 
+        userService.insertMessage(TestUtils.createMessageWithoutReceiver(ad));
     }
 
     @Test
@@ -97,7 +97,7 @@ public class UserServiceTest extends AbstractTest {
         Assertions.assertFalse(messages.isEmpty());
         Assertions.assertEquals(1, messages.size());
         AdChatResponse adChatResponse = messages.values().stream().findFirst().get();
-        Assertions.assertEquals(1, adChatResponse.getMessages().size());
+        Assertions.assertEquals(2, adChatResponse.getMessages().size());
         Assertions.assertEquals("test ad", adChatResponse.getContent());
         Assertions.assertEquals("user1", adChatResponse.getMessages().get(0).getUser1());
         Assertions.assertEquals("msg-content-test", adChatResponse.getMessages().get(0).getMessageContent());
@@ -128,11 +128,6 @@ public class UserServiceTest extends AbstractTest {
         Assertions.assertEquals(4, reviewResponse.getRating());
     }
 
-/*    @Test
-    public void testSetProfilePictureTest () {
-        MultipartFile multipartFile = new MockMultipartFile();
-        userService.setProfilePicture();
-    }*/
 
     @Test
     public void getUsersTest() {
@@ -141,8 +136,23 @@ public class UserServiceTest extends AbstractTest {
         Assertions.assertEquals(2, users.size());
     }
 
-    @AfterEach
-    public void cleanup() {
+    @Test
+    public void insertAdTest() {
+        County county = countyDAO.findAll().get(0);
+        User user = userDAO.findAll().get(0);
+
+        AdRequest adRequest = new AdRequest();
+        adRequest.setContent("content-test");
+        adRequest.setCountyId(county.getId());
+        adRequest.setTitle("title-test");
+        adRequest.setUserId(user.getId());
+        adRequest.setId(1);
+        userService.insertAd(adRequest);
+        List<Ad> ads = adDAO.findAll();
+        Assertions.assertEquals(2, ads.size());
+        Ad ad = ads.get(1);
+        Assertions.assertEquals("content-test", ad.getContent());
+        Assertions.assertEquals("title-test", ad.getTitle());
 
     }
 

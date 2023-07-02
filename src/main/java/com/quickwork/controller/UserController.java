@@ -75,7 +75,7 @@ public class UserController {
     @ApiOperation(value = "Retrieve all messages for user", produces = MediaType.APPLICATION_JSON_VALUE)
     @GetMapping(value = "public/{username}")
     public List<AdChatResponse> getUsersMessages(@PathVariable("username") String username) {
-        logger.info(userService.getUsersAdMessages(username).values());
+        logger.info("Getting messages for user " + username);
         return new ArrayList<>(userService.getUsersAdMessages(username).values());
     }
 

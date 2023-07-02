@@ -3,6 +3,7 @@ package com.quickwork.model;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
+import org.jetbrains.annotations.NotNull;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -11,7 +12,7 @@ import java.util.Date;
 @Table(name = "message", schema = "qw_dta")
 @Getter
 @Setter
-public class Message {
+public class Message implements Comparable<Message>{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,4 +32,9 @@ public class Message {
 
     @CreationTimestamp
     private Date createdDate;
+
+    @Override
+    public int compareTo(@NotNull Message o) {
+        return this.getCreatedDate().compareTo(o.getCreatedDate());
+    }
 }

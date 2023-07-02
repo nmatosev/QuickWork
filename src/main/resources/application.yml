@@ -25,3 +25,6 @@ management:
 
 jwt:
   secret: quickwork
+
+expiry:
+    time:
